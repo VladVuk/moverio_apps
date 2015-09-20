@@ -9,7 +9,7 @@ public class VisualTracker {
 	private static final String TAG = "VisualTracker";
 	private int markerID = -1;
 	
-	static VisualTracker vInstance;
+	private static VisualTracker vInstance;
 	
 	public static VisualTracker getInstance() {
 		return vInstance;

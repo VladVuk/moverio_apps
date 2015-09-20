@@ -103,7 +103,11 @@ public class InteractiveView extends View {
 				paint.setTextSize(20);
 				canvas.drawText(alignText, 10, 20, paint); 
 			}
-				
+			else {
+				paint.setColor(Color.WHITE); 
+				paint.setTextSize(20);
+				canvas.drawText("SPAAM starts, click on " + countMax + " points", 10, 20, paint); 				
+			}	
 		}
 		valid = true;
 	}

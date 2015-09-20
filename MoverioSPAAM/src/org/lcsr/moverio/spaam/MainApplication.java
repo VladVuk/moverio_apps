@@ -1,3 +1,8 @@
+// Ideas:
+// 1. Half fixed calibration point on screen
+// 2. Use IMU to compensate for the OST jitter
+// 3. The OpenGL stuff in SPAAM paper
+
 package org.lcsr.moverio.spaam;
 
 import org.artoolkit.ar.base.assets.AssetHelper;

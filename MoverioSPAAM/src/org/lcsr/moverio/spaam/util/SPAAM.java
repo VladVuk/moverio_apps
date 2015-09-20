@@ -9,12 +9,12 @@ public class SPAAM {
 	
 	private static String TAG = "SPAAM";
 	
-	private Matrix G = null;
+	public static Matrix G = null;
+	public static boolean OK = false;
 
 	private List<Alignment> alignPoints = new ArrayList<Alignment>();
 	private List<Alignment> alignPointsTrans = new ArrayList<Alignment>();
 	private int countMax = 6;
-	public static boolean OK = false;
 	
 	private Matrix singlePoint = null;
 	private Matrix transformScreenPoint = null;
@@ -31,6 +31,15 @@ public class SPAAM {
 		if ( point != null ) {
 			singlePoint = point;
 		}
+	}
+	
+	public void clearSPAAM() {
+		alignPoints = null;
+		alignPointsTrans = null;
+		G = null;
+		OK = false;
+		singlePoint = null;
+		Log.i(TAG, "Clear SPAAM");
 	}
 	
 	public void setSinglePointLocation(double X, double Y, double Z) {
@@ -53,9 +62,6 @@ public class SPAAM {
 		}
 	}
 	
-	public Matrix getG() {
-		return G;
-	}
 	
 	public void calculateTransform() {
 		double tempAvg;
