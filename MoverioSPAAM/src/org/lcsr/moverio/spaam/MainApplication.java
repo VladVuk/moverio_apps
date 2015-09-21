@@ -1,7 +1,14 @@
+/*
+ *  MainApplication.java
+ *  
+ *  Author(s): Long Qian
+ *	LCSR, Johns Hopkins University
+ *
+ */
+
 // Ideas:
-// 1. Half fixed calibration point on screen
-// 2. Use IMU to compensate for the OST jitter
-// 3. The OpenGL stuff in SPAAM paper
+// 1. Use IMU to compensate for the OST jitter
+// 2. The OpenGL stuff in SPAAM paper
 
 package org.lcsr.moverio.spaam;
 

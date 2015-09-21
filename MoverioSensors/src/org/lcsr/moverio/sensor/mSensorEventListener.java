@@ -1,3 +1,11 @@
+/*
+ *  mSensorEventListener.java
+ *  
+ *  Author(s): Long Qian
+ *	LCSR, Johns Hopkins University
+ *
+ */
+
 package org.lcsr.moverio.sensor;
 
 import android.widget.TextView;

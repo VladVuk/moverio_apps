@@ -1,3 +1,11 @@
+/*
+ *  SimpleClient.java
+ *  
+ *  Author(s): Long Qian
+ *	LCSR, Johns Hopkins University
+ *
+ */
+
 package org.lcsr.java.igtlink;
 
 import com.neuronrobotics.sdk.common.Log;
@@ -26,7 +34,7 @@ public class SimpleClient implements IOpenIgtPacketListener {
 			Log.enableSystemPrint(true);
 			
 			Log.debug("Starting client");
-			client = new GenericIGTLinkClient ("10.188.186.219",18944);
+			client = new GenericIGTLinkClient ("10.188.187.183",18944);
 			client.addIOpenIgtOnPacket(new SimpleClient());	
 			
 			for(int i=0;i<500;i++){

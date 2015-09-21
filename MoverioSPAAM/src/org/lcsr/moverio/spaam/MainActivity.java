@@ -1,3 +1,11 @@
+/*
+ *  MainActivity.java
+ *  
+ *  Author(s): Long Qian
+ *	LCSR, Johns Hopkins University
+ *
+ */
+
 package org.lcsr.moverio.spaam;
 
 import java.io.File;

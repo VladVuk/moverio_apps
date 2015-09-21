@@ -1,3 +1,11 @@
+/*
+ *  InteractiveView.java
+ *  
+ *  Author(s): Long Qian
+ *	LCSR, Johns Hopkins University
+ *
+ */
+
 package org.lcsr.moverio.spaam.util;
 
 import Jama.Matrix;
