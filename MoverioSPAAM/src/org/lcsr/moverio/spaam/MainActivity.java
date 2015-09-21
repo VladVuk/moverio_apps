@@ -1,13 +1,12 @@
 package org.lcsr.moverio.spaam;
 
+import java.io.File;
 import org.artoolkit.ar.base.*;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.igtlink.IGTLServer;
 import org.lcsr.moverio.spaam.R;
 import org.lcsr.moverio.spaam.util.*;
-
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
-
 import Jama.Matrix;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -15,6 +14,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.format.Formatter;
@@ -35,11 +35,14 @@ public class MainActivity extends ARActivity {
 
 	private FrameLayout mainLayout;
 	
-	private Button cancelbutton;
+	private Button cancelButton;
 	private Button igtlButton;
 	private TextView igtlMessage;
 	private boolean igtlStatus = false;
 	private IGTLServer igtlServer;
+	
+	private Button readFileButton, writeFileButton;
+	private String filename = "G.txt";
 
 	private SPAAM spaamCalculator = new SPAAM();
 	
@@ -87,8 +90,8 @@ public class MainActivity extends ARActivity {
 			}        	
         });
         
-        cancelbutton = (Button)this.findViewById(R.id.CancelButton);
-        cancelbutton.setOnClickListener(new View.OnClickListener() {
+        cancelButton = (Button)this.findViewById(R.id.CancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if ( !spaamCalculator.cancalLast()) {
@@ -96,6 +99,35 @@ public class MainActivity extends ARActivity {
 				}
 			}
         });
+
+        readFileButton = (Button)this.findViewById(R.id.ReadButton);
+        readFileButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				File file = new File(Environment.getExternalStorageDirectory(), filename);
+				if ( !spaamCalculator.readFile(file)) {
+					buildAlertMessageNoCube("Read file falied");
+				}
+			}
+        });
+
+        writeFileButton = (Button)this.findViewById(R.id.WriteButton);
+        writeFileButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if ( !spaamCalculator.OK )
+					buildAlertMessageNoCube("SPAAM not done");
+				else {
+					File sdcard = Environment.getExternalStorageDirectory();
+					File file = new File(sdcard, filename);
+					if ( !spaamCalculator.writeFile(file)) {
+						buildAlertMessageNoCube("Write file falied");
+					}
+				}
+			}
+        });
+        
+        
 
         mainLayout.setOnTouchListener(new OnTouchListener() {
         	public boolean onTouch(View v, MotionEvent event) {

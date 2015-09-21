@@ -5,5 +5,7 @@
     <string name="def_ipAddress">IP Address</string>
     <string name="def_IGTDisp">OpenIGTLink Package</string>
     <string name="def_CancelButton">Cancel Last</string>
-
+    <string name="def_ReadButton">Read File</string>
+    <string name="def_WriteButton">Write File</string>
+    
 </resources>

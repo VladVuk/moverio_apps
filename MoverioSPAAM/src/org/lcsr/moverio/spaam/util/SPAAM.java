@@ -1,5 +1,9 @@
 package org.lcsr.moverio.spaam.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import android.util.Log;
@@ -211,5 +215,86 @@ public class SPAAM {
 	public void setMaxAlignment(int max) {
 		countMax = max;
 		countCurrent = 0;
+	}
+
+	public boolean readFile(File file) {
+		try {
+		    BufferedReader br = new BufferedReader(new FileReader(file));
+		    String line;
+		    List<Double> values = new ArrayList<Double>();
+		    while ((line = br.readLine()) != null) {
+		    	String[] str_values = line.split(" ");
+		    	for (String str : str_values)
+	        	{
+	        		double str_double = Double.parseDouble(str);
+	        		values.add(str_double);
+	        	}
+		    }
+		    br.close();
+		    if (values.size() < 12) {
+		    	Log.e(TAG, "File format wrong");
+		    	return false;
+		    }
+		    double[] GA = new double[12];
+		    for (int i = 0; i < 12; i++) {
+		    	GA[i] = values.get(0);
+		    	values.remove(0);
+		    }
+		    if (values.size() % 7 != 0) {
+		    	Log.e(TAG, "File format wrong");
+		    	return false;
+		    }
+		    G = new Matrix(GA, 3);
+		    alignPoints = null;
+		    int alignCount = values.size() / 7;
+		    for (int i = 0; i < alignCount; i++) {
+		    	Matrix sc = new Matrix(3, 1);
+		    	Matrix sp = new Matrix(4, 1);
+		    	sc.set(0, 0, values.get(7*i + 0));
+		    	sc.set(1, 0, values.get(7*i + 1));
+		    	sc.set(2, 0, values.get(7*i + 2));
+		    	sp.set(0, 0, values.get(7*i + 3));
+		    	sp.set(1, 0, values.get(7*i + 4));
+		    	sp.set(2, 0, values.get(7*i + 5));
+		    	sp.set(3, 0, values.get(7*i + 6));
+		    	alignPoints.add(new Alignment(sc, sp));
+		    }
+		    values = null;
+		    OK = true;
+		    countMax = alignCount;
+		    countCurrent = alignCount;
+		    Log.e(TAG, "File successfully parsed, with " + countMax + " alignmnets");
+		    return true;
+		}
+		catch (Exception e) {
+		    Log.e(TAG, "Read file failed");
+		    return false;
+		}
+	}
+
+	public boolean writeFile(File file) {
+		try {
+			if (!file.exists())
+				file.createNewFile();
+			FileOutputStream of = new FileOutputStream(file);
+			String ss = G.get(0, 0) + " " + G.get(0, 1) + " " + G.get(0, 2) + " " + G.get(0, 3) + System.getProperty("line.separator")
+					  + G.get(1, 0) + " " + G.get(1, 1) + " " + G.get(1, 2) + " " + G.get(1, 3) + System.getProperty("line.separator")
+					  + G.get(1, 0) + " " + G.get(1, 1) + " " + G.get(1, 2) + " " + G.get(1, 3) + System.getProperty("line.separator");
+			of.write(ss.getBytes());
+			for (int i = 0; i < countCurrent; i++) {
+				Matrix sc = alignPoints.get(i).screenPoint;
+				Matrix sp = alignPoints.get(i).spacePoint;
+				String sss = sc.get(0, 0) + " " + sc.get(1, 0) + " " + sc.get(2, 0) + " "
+						   + sp.get(0, 0) + " " + sp.get(1, 0) + " " + sp.get(2, 0) + " " + sp.get(3, 0)
+						   + System.getProperty("line.separator");
+				of.write(sss.getBytes());
+			}
+			of.close();
+			return true;
+		}
+		catch (Exception e) {
+			Log.e(TAG, "Write file failed");
+		    return false;
+		}
 	}
 }

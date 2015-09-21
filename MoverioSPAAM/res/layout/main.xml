@@ -19,7 +19,7 @@
         android:layout_width="320dp"
         android:layout_height="480dp"
         android:orientation="vertical" >
-        
+
         
         <Button
             android:id="@+id/CancelButton"
@@ -32,6 +32,35 @@
             android:text="@string/def_CancelButton"
             android:textColor="@android:color/white"
             android:textSize="20sp" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/ReadButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="@string/def_ReadButton"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/WriteButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="@string/def_WriteButton"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/IPAddressDisp"
