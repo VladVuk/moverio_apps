@@ -35,6 +35,7 @@ public class MainActivity extends ARActivity {
 
 	private FrameLayout mainLayout;
 	
+	private Button cancelbutton;
 	private Button igtlButton;
 	private TextView igtlMessage;
 	private boolean igtlStatus = false;
@@ -84,23 +85,29 @@ public class MainActivity extends ARActivity {
 			        Log.i(TAG, "Stop OpenIGTLink");
 				}
 			}        	
-        });        
+        });
+        
+        cancelbutton = (Button)this.findViewById(R.id.CancelButton);
+        cancelbutton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if ( !spaamCalculator.cancalLast()) {
+					buildAlertMessageNoCube("You have not made any alignment");
+				}
+			}
+        });
 
         mainLayout.setOnTouchListener(new OnTouchListener() {
         	public boolean onTouch(View v, MotionEvent event) {
         		switch (event.getAction()) {
         	    case MotionEvent.ACTION_DOWN:
-        	    	if ( !SPAAM.OK ){
+        	    	if ( !spaamCalculator.OK ){
 	        	    	int x = (int) event.getX();
 	                    int y = (int) event.getY();
-						if( visualTracker.getMarkerVisibility() ) {
-		                    intView.setXY(x, y, InteractiveView.PointType.PointCursor);
-		                    Matrix t = visualTracker.getMarkerTransformation();
-							spaamCalculator.newAlignment(x, y, t);
-							intView.setAlignCount(spaamCalculator.getListSize());
-						}
+						if( visualTracker.getMarkerVisibility() )
+							spaamCalculator.newAlignment(x, y, visualTracker.getMarkerTransformation());
 						else
-							buildAlertMessageNoCube();
+							buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
         	    	}
 					break;
         	    case MotionEvent.ACTION_UP:
@@ -120,7 +127,7 @@ public class MainActivity extends ARActivity {
             switch(msg.what) {
             case 1:
             	TransformNR t = (TransformNR)msg.obj;
-        		igtlMessage.setText("Type: Transform" + System.getProperty("line.separator")
+        		igtlMessage.setText("Received Package: Transform" + System.getProperty("line.separator")
 						+ "Position[0]: " + t.getPositionArray()[0] + System.getProperty("line.separator")
 						+ "Position[1]: " + t.getPositionArray()[1] + System.getProperty("line.separator")
 						+ "Position[2]: " + t.getPositionArray()[2]);
@@ -132,10 +139,10 @@ public class MainActivity extends ARActivity {
     };
     
 
-	private void buildAlertMessageNoCube()
+	private void buildAlertMessageNoCube(String alertText)
 	{
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("You need to see the cube in order for the calibration to work")
+		builder.setMessage(alertText)
 				.setCancelable(false)
 				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(final DialogInterface dialog,  final int id) {
@@ -156,13 +163,12 @@ public class MainActivity extends ARActivity {
 			igtlServer.sendTransform(T);
     	}
     	if ( intView != null  ) {
-    		if ( SPAAM.OK ) {
+    		if ( spaamCalculator.OK ) {
 	    		if ( T != null) {
-	    			intView.setXY( spaamCalculator.getSreenPointAligned(T), InteractiveView.PointType.PointAlign);
+	    			spaamCalculator.updateSreenPointAligned(T);
 	    		}
     		}
-    		if ( !intView.getValid() )
-    			intView.invalidate();
+    		intView.invalidate();
     	}
     }
     
@@ -190,10 +196,9 @@ public class MainActivity extends ARActivity {
     @Override
     public void onResume() {
     	super.onResume();
-        intView = new InteractiveView(this);
-        intView.setMaxAlignment(6);
-        intView.setGeometry(640,480);   
+        intView = new InteractiveView(this, spaamCalculator);
     	mainLayout.addView(intView);
+        intView.setGeometry(640, 480);
         Log.i(TAG, "InteractiveView added");
     	hideCameraPreview();
     }

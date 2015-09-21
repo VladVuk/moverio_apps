@@ -9,18 +9,21 @@ public class SPAAM {
 	
 	private static String TAG = "SPAAM";
 	
-	public static Matrix G = null;
-	public static boolean OK = false;
+	public Matrix G;
+	public boolean OK = false;
+	public int countMax = 6;
+	public int countCurrent = 0;
 
 	private List<Alignment> alignPoints = new ArrayList<Alignment>();
-	private List<Alignment> alignPointsTrans = new ArrayList<Alignment>();
-	private int countMax = 6;
 	
-	private Matrix singlePoint = null;
-	private Matrix transformScreenPoint = null;
-	private Matrix transformSpacePoint = null;
-	private Matrix transformScreenPointInv = null;
-	private Matrix transformSpacePointInv = null;
+	private Matrix singlePoint;
+	private Matrix transformScreenPoint;
+	private Matrix transformSpacePoint;
+	private Matrix transformScreenPointInv;
+	private Matrix transformSpacePointInv;
+	
+	public Matrix markerTrans;
+	public Matrix markerPoint;
 	
 	
 	public SPAAM() {
@@ -33,11 +36,41 @@ public class SPAAM {
 		}
 	}
 	
+	public boolean cancalLast() {
+		if (OK) {
+			OK = false;
+			alignPoints.remove(alignPoints.size()-1);
+			countCurrent = alignPoints.size();
+			transformScreenPoint = null;
+			transformSpacePoint = null;
+			transformScreenPointInv = null;
+			transformSpacePointInv = null;
+			G = null;
+			markerTrans = null;
+			markerPoint = null;
+			return true;
+		}
+		else if (countCurrent != 0) {
+			alignPoints.remove(alignPoints.size()-1);
+			countCurrent = alignPoints.size();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public Matrix getLastCursorPoint() {
+		if (countCurrent == 0)
+			return null;
+		else
+			return alignPoints.get(countCurrent-1).screenPoint;
+	}
+	
 	public void clearSPAAM() {
 		alignPoints = null;
-		alignPointsTrans = null;
 		G = null;
 		OK = false;
+		countCurrent = 0;
 		singlePoint = null;
 		Log.i(TAG, "Clear SPAAM");
 	}
@@ -52,11 +85,12 @@ public class SPAAM {
 			Log.i(TAG, "Single point has not been set.");
 		}
 		Alignment a = new Alignment(X, Y, M.times(singlePoint));
-		if ( alignPoints.size() < countMax ) {
+		if ( countCurrent < countMax ) {
 			alignPoints.add(a);
+			countCurrent = alignPoints.size();
 			Log.i(TAG, "New alignment updated");
 		}
-		if ( alignPoints.size() == countMax && G == null ) {
+		if ( countCurrent == countMax && G == null ) {
 			calculateG();
 			Log.i(TAG, "Calculate G transformation");
 		}
@@ -66,18 +100,17 @@ public class SPAAM {
 	public void calculateTransform() {
 		double tempAvg;
 		double tempNorm;
-		int count = alignPoints.size();
 		
 		// transformScreenPoint
 		transformScreenPoint = new Matrix(3, 3, 0.0);
 		tempAvg = Alignment.avg(alignPoints, 0, Alignment.PointType.Screen);
 		tempNorm = Alignment.norm(alignPoints, 0, Alignment.PointType.Screen);
 		transformScreenPoint.set(0, 2, Alignment.avg(alignPoints, 0, Alignment.PointType.Screen));
-		transformScreenPoint.set(0, 0, Math.sqrt(tempNorm - count * tempAvg * tempAvg ));
+		transformScreenPoint.set(0, 0, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		tempAvg = Alignment.avg(alignPoints, 1, Alignment.PointType.Screen);
 		tempNorm = Alignment.norm(alignPoints, 1, Alignment.PointType.Screen);
 		transformScreenPoint.set(1, 2, tempAvg);
-		transformScreenPoint.set(1, 1, Math.sqrt(tempNorm - count * tempAvg * tempAvg ));
+		transformScreenPoint.set(1, 1, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		transformScreenPoint.set(2, 2, 1.0);
 		
 		// transformSpacePoint
@@ -85,15 +118,15 @@ public class SPAAM {
 		tempAvg = Alignment.avg(alignPoints, 0, Alignment.PointType.Space);
 		tempNorm = Alignment.norm(alignPoints, 0, Alignment.PointType.Space);
 		transformSpacePoint.set(0, 3, tempAvg);
-		transformSpacePoint.set(0, 0, Math.sqrt(tempNorm - count * tempAvg * tempAvg ));
+		transformSpacePoint.set(0, 0, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		tempAvg = Alignment.avg(alignPoints, 1, Alignment.PointType.Space);
 		tempNorm = Alignment.norm(alignPoints, 1, Alignment.PointType.Space);
 		transformSpacePoint.set(1, 3, tempAvg);
-		transformSpacePoint.set(1, 1, Math.sqrt(tempNorm - count * tempAvg * tempAvg ));
+		transformSpacePoint.set(1, 1, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		tempAvg = Alignment.avg(alignPoints, 2, Alignment.PointType.Space);
 		tempNorm = Alignment.norm(alignPoints, 2, Alignment.PointType.Space);
 		transformSpacePoint.set(2, 3, tempAvg);
-		transformSpacePoint.set(2, 2, Math.sqrt(tempNorm - count * tempAvg * tempAvg ));
+		transformSpacePoint.set(2, 2, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		transformSpacePoint.set(3, 3, 1.0);
 		
 		// calculate transformation inverse
@@ -108,16 +141,16 @@ public class SPAAM {
 		}
 
 		calculateTransform();
-		int count = alignPoints.size();
 		
-		for ( int i = 0; i < count; i++ ) {
+		List<Alignment> alignPointsTrans = new ArrayList<Alignment>();
+		for ( int i = 0; i < countCurrent; i++ ) {
 			Alignment a = alignPoints.get(i);
 			alignPointsTrans.add(new Alignment(transformScreenPointInv.times(a.screenPoint),
 					transformSpacePointInv.times(a.spacePoint)));
 		}
 		
-		Matrix B = new Matrix(2*count, 12, 0.0);
-		for ( int i = 0; i < count; i++ ) {
+		Matrix B = new Matrix(2*countCurrent, 12, 0.0);
+		for ( int i = 0; i < countCurrent; i++ ) {
 			Alignment a = alignPointsTrans.get(i);
 
 			double xi = a.spacePoint.get(0, 0);
@@ -153,40 +186,30 @@ public class SPAAM {
 		G.setMatrix(1, 1, 0, 3, eigenVecTranspose.getMatrix(0, 0, 4, 7));
 		G.setMatrix(2, 2, 0, 3, eigenVecTranspose.getMatrix(0, 0, 8, 11));
 
-//		Log.i(TAG, G.get(0, 0) + ", " + G.get(0,1) + ", " + G.get(0,2) + ", " + G.get(0,3));
-//		Log.i(TAG, G.get(1, 0) + ", " + G.get(1,1) + ", " + G.get(1,2) + ", " + G.get(1,3));
-//		Log.i(TAG, G.get(2, 0) + ", " + G.get(2,1) + ", " + G.get(2,2) + ", " + G.get(2,3));
-
 		Log.i(TAG, "Matrix G computed");
 		
 		OK = true;
 		
-		updateAlignment();
-	}
-	
-	private void updateAlignment() {
-		for ( int i = 0; i < alignPoints.size(); i++ ) {
-			Alignment at = alignPointsTrans.get(i);
-			Alignment a = alignPoints.get(i);
-			a.setPointAligned( transformScreenPoint.times(G.times(at.spacePoint)) );
-		}
+//		for ( int i = 0; i < countCurrent; i++ ) {
+//			Alignment at = alignPointsTrans.get(i);
+//			Alignment a = alignPoints.get(i);
+//			a.setPointAligned( transformScreenPoint.times(G.times(at.spacePoint)) );
+//		}
 	}
 	
 	public List<Alignment> getList() {
 		return alignPoints;
 	}
 	
-	public Matrix getSreenPointAligned( Matrix T ) {
+	public void updateSreenPointAligned( Matrix T ) {
 		if ( T == null || G == null )
-			return null;
-		return transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
-	}
-
-	public int getListSize() {
-		return alignPoints.size();
+			return;
+		markerTrans = T;
+		markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
 	}
 
 	public void setMaxAlignment(int max) {
 		countMax = max;
+		countCurrent = 0;
 	}
 }

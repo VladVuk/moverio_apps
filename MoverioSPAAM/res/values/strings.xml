@@ -4,5 +4,6 @@
     <string name="def_IGTButton">OpenIGTLink Start</string>
     <string name="def_ipAddress">IP Address</string>
     <string name="def_IGTDisp">OpenIGTLink Package</string>
+    <string name="def_CancelButton">Cancel Last</string>
 
 </resources>

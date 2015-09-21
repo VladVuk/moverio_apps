@@ -19,6 +19,19 @@
         android:layout_width="320dp"
         android:layout_height="480dp"
         android:orientation="vertical" >
+        
+        
+        <Button
+            android:id="@+id/CancelButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/def_CancelButton"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/IPAddressDisp"
@@ -61,6 +74,8 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:maxLines="10" />
+        
+        
     </LinearLayout>
     
 </LinearLayout>
