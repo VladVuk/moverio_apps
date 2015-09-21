@@ -20,6 +20,9 @@ public class InteractiveView extends View {
 	private boolean valid = true;
 	private int alignCount;
 	private int countMax = 6;
+	private int countCurrent = 0;
+	private int[] auxiliaryX;
+	private int[] auxiliaryY;
 	private String alignText;
 	private int lc = 60;
 	
@@ -107,18 +110,36 @@ public class InteractiveView extends View {
 				paint.setColor(Color.WHITE); 
 				paint.setTextSize(20);
 				canvas.drawText("SPAAM starts, click on " + countMax + " points", 10, 20, paint); 				
-			}	
+			}
+			paint.setColor(Color.WHITE);
+			paint.setAlpha(96);
+			canvas.drawCircle(auxiliaryX[countCurrent], auxiliaryY[countCurrent], 40, paint);
 		}
 		valid = true;
 	}
 
 	public void setAlignCount (int count) {
 		alignCount = count;
+		countCurrent = count;
 		alignText = "Current Alignments: " + alignCount + " / " + countMax;
 	}
 
 	public void setMaxAlignment(int max) {
 		countMax = max;
+		auxiliaryX = new int[countMax];
+		auxiliaryY = new int[countMax];
+		auxiliaryX[0] = 80;
+		auxiliaryY[0] = 60;
+		auxiliaryX[1] = 560;
+		auxiliaryY[1] = 60;
+		auxiliaryX[2] = 80;
+		auxiliaryY[2] = 420;
+		auxiliaryX[3] = 560;
+		auxiliaryY[3] = 420;
+		auxiliaryX[4] = 320;
+		auxiliaryY[4] = 120;
+		auxiliaryX[5] = 320;
+		auxiliaryY[5] = 360;
 	}
 
 }

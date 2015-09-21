@@ -33,10 +33,10 @@ public class IGTLServer implements IOpenIgtPacketListener {
 	}
 		
 	public void sendTransform(Matrix t) {
-		if ( !server.isConnected() ) {
-			Log.i(TAG, "Server not connected");
-			return;
-		}
+//		if ( !server.isConnected() ) {
+//			Log.i(TAG, "Server not connected");
+//			return;
+//		}
 		try {
 			TransformNR NRt = new TransformNR(t);
 			server.pushTransformMessage("From Android, count = " + sendCount, NRt);

@@ -38,14 +38,13 @@ public class MainActivity extends ARActivity {
 	private Button igtlButton;
 	private TextView igtlMessage;
 	private boolean igtlStatus = false;
+	private IGTLServer igtlServer;
 
 	private SPAAM spaamCalculator = new SPAAM();
 	
-	private InteractiveView intView = null;
+	private InteractiveView intView;
 	
-	private VisualTracker visualTracker = new VisualTracker();
-	
-	private IGTLServer igtlServer = null;
+	private VisualTracker visualTracker = new VisualTracker();	
 	
 	private String ipAddress;
 	
@@ -84,7 +83,6 @@ public class MainActivity extends ARActivity {
 					igtlStatus = false;
 			        Log.i(TAG, "Stop OpenIGTLink");
 				}
-				//toolLayout.invalidate();
 			}        	
         });        
 
