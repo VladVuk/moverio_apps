@@ -22,13 +22,14 @@ public final class R {
     }
     public static final class id {
         public static final int CancelButton=0x7f090003;
-        public static final int IGTButton=0x7f090007;
-        public static final int IPAddressDisp=0x7f090006;
-        public static final int OpenIGTDisp=0x7f090008;
-        public static final int ReadButton=0x7f090004;
-        public static final int WriteButton=0x7f090005;
+        public static final int IGTButton=0x7f090008;
+        public static final int IPAddressDisp=0x7f090007;
+        public static final int ModifyButton=0x7f090004;
+        public static final int OpenIGTDisp=0x7f090009;
+        public static final int ReadButton=0x7f090005;
+        public static final int WriteButton=0x7f090006;
         public static final int mainLayout=0x7f090001;
-        public static final int settings=0x7f090009;
+        public static final int settings=0x7f09000a;
         public static final int toolLayout=0x7f090002;
         public static final int topLayout=0x7f090000;
     }
@@ -43,6 +44,7 @@ public final class R {
         public static final int def_CancelButton=0x7f050009;
         public static final int def_IGTButton=0x7f050006;
         public static final int def_IGTDisp=0x7f050008;
+        public static final int def_ModifyButton=0x7f05000c;
         public static final int def_ReadButton=0x7f05000a;
         public static final int def_WriteButton=0x7f05000b;
         public static final int def_ipAddress=0x7f050007;

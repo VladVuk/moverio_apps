@@ -14,19 +14,26 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import android.graphics.Point;
 import android.util.Log;
 import Jama.*;
 
 public class SPAAM {
 	
 	private static String TAG = "SPAAM";
+	public static enum SPAAMStatus {CALIB_RAW, DONE_RAW, CALIB_ADD, DONE_ADD};
+	public SPAAMStatus status;
+	private Matrix G;
+	private Matrix A;
 	
-	public Matrix G;
-	public boolean OK = false;
-	public int countMax = 6;
+	public int countMax = 20;
+	public int countAddMax = 4;
 	public int countCurrent = 0;
+	public int countTuple = 0;
 
-	private List<Alignment> alignPoints = new ArrayList<Alignment>();
+	private List<Alignment> alignPoints;
+	private List<PointTuple> alignTuples;
 	
 	private Matrix singlePoint;
 	private Matrix transformScreenPoint;
@@ -34,23 +41,76 @@ public class SPAAM {
 	private Matrix transformScreenPointInv;
 	private Matrix transformSpacePointInv;
 	
-	public Matrix markerTrans;
-	public Matrix markerPoint;
+	private Matrix markerTrans;
+	private Matrix markerPoint;
+	private Matrix markerPointAdd;
+	private List<Point> auxiliaryPoints;
 	
 	
-	public SPAAM() {
+	public SPAAM( Matrix point ) {
+		setupAuxiliaryPoints();
+		setSinglePointLocation(point);
+		alignPoints = new ArrayList<Alignment>();
+		status = SPAAMStatus.CALIB_RAW;
 		Log.i(TAG, "SPAAM initialized");
+	}
+
+	public SPAAM( double X, double Y, double Z ) {
+		setupAuxiliaryPoints();
+		setSinglePointLocation( X, Y, Z );
+		alignPoints = new ArrayList<Alignment>();
+		status = SPAAMStatus.CALIB_RAW;
+		Log.i(TAG, "SPAAM initialized");
+	}
+	
+	public SPAAM( ) {
+		setupAuxiliaryPoints();
+		setSinglePointLocation( 0.0, 0.0, 0.0 );
+		alignPoints = new ArrayList<Alignment>();
+		status = SPAAMStatus.CALIB_RAW;
+		Log.i(TAG, "SPAAM initialized");
+	}
+	
+	public void setupAuxiliaryPoints() {
+		auxiliaryPoints = new ArrayList<Point>();
+		auxiliaryPoints.add(new Point(120, 100));
+		auxiliaryPoints.add(new Point(120, 380));
+		auxiliaryPoints.add(new Point(520, 380));
+		auxiliaryPoints.add(new Point(520, 100));
+		auxiliaryPoints.add(new Point(220, 240));
+		auxiliaryPoints.add(new Point(420, 240));
+		Log.i(TAG, auxiliaryPoints.size() + " auxiliary points added");
 	}
 	
 	public void setSinglePointLocation(Matrix point) {
 		if ( point != null ) {
 			singlePoint = point;
+			Log.i(TAG, "Single point set successfully");
 		}
+		else
+			Log.i(TAG, "Single point set failed");
 	}
 	
+	public void setSinglePointLocation(double X, double Y, double Z) {
+        double[] singlePointArray = {X, Y, Z, 1.0};
+        singlePoint = new Matrix( singlePointArray, 4);
+	}	
+	
 	public boolean cancalLast() {
-		if (OK) {
-			OK = false;
+		switch ( status ) {
+		case CALIB_RAW:
+			if ( countCurrent == 0 ) {
+				Log.i(TAG, "None alignment made");
+				return false;
+			}
+			else {
+				alignPoints.remove(alignPoints.size()-1);
+				countCurrent = alignPoints.size();
+				Log.i(TAG, "Last alignment removed");
+				break;
+			}
+		case DONE_RAW:
+			status = SPAAMStatus.CALIB_RAW;
 			alignPoints.remove(alignPoints.size()-1);
 			countCurrent = alignPoints.size();
 			transformScreenPoint = null;
@@ -60,54 +120,202 @@ public class SPAAM {
 			G = null;
 			markerTrans = null;
 			markerPoint = null;
-			return true;
+			Log.i(TAG, "Last alignment removed, SPAAM result cleared");
+			break;
+		case CALIB_ADD:
+			if ( countTuple == 0 ) {
+				Log.i(TAG, "None tuple alignment mede");
+				return false;
+			}
+			else {
+				alignTuples.remove(alignTuples.size()-1);
+				countTuple = alignTuples.size();
+				Log.i(TAG, "Last tuple alignment removed");
+				break;
+			}
+		case DONE_ADD:
+			status = SPAAMStatus.CALIB_ADD;
+			alignTuples.remove(alignTuples.size()-1);
+			countTuple = alignTuples.size();
+			A = null;
+			markerPointAdd = null;
+			// TODO: clear additional spaam data
+			Log.i(TAG, "Last tuple alignment removed, additional SPAAM result cleared");
+			break;
+		default:
+			break;
 		}
-		else if (countCurrent != 0) {
-			alignPoints.remove(alignPoints.size()-1);
-			countCurrent = alignPoints.size();
-			return true;
-		}
-		else
-			return false;
+		return true;
 	}
 	
-	public Matrix getLastCursorPoint() {
+	public Point getLastCursorPoint() {
 		if (countCurrent == 0)
 			return null;
+		else {
+			Matrix temp =  alignPoints.get(countCurrent-1).screenPoint;
+			return new Point((int)temp.get(0,0), (int)temp.get(1,0));
+		}
+	}
+	
+	public Point getLastAddCursorPoint() {
+		if (countTuple == 0)
+			return null;
 		else
-			return alignPoints.get(countCurrent-1).screenPoint;
+			return alignTuples.get(countTuple-1).clickPoint;
+	}
+
+	public Point getMarkerPoint() {
+		if ( markerPoint == null )
+			return null;
+		else
+			return new Point((int)markerPoint.get(0,0), (int)markerPoint.get(1,0));
+	}
+	
+	public Point getMarkerPointAdd() {
+		if ( markerPointAdd == null )
+			return null;
+		else
+			return new Point((int)markerPointAdd.get(0,0), (int)markerPointAdd.get(1,0));
+	}
+
+	public Point getAuxiliaryPoint() {
+		if ( status == SPAAMStatus.CALIB_RAW && countCurrent < auxiliaryPoints.size() )
+			return auxiliaryPoints.get(countCurrent);
+		else
+			return null;
 	}
 	
 	public void clearSPAAM() {
 		alignPoints = null;
+		alignTuples = null;
+		transformScreenPoint = null;
+		transformSpacePoint = null;
+		transformScreenPointInv = null;
+		transformSpacePointInv = null;
+		auxiliaryPoints = null;
 		G = null;
-		OK = false;
+		status = SPAAMStatus.CALIB_RAW;
 		countCurrent = 0;
+		countTuple = 0;
 		singlePoint = null;
-		Log.i(TAG, "Clear SPAAM");
-	}
-	
-	public void setSinglePointLocation(double X, double Y, double Z) {
-        double[] singlePointArray = {0.0, 0.0, 0.0, 1.0};
-        singlePoint = new Matrix( singlePointArray, 4);
+		markerTrans = null;
+		markerPoint = null;
+		markerPointAdd = null;
+		// TODO clear A
+		Log.i(TAG, "SPAAM cleared");
 	}
 	
 	public void newAlignment(int X, int Y, Matrix M ){
-		if ( singlePoint == null ) {
-			Log.i(TAG, "Single point has not been set.");
+		if ( status != SPAAMStatus.CALIB_RAW ) {
+			Log.i(TAG, "Not in CALIB_RAW status");
 		}
-		Alignment a = new Alignment(X, Y, M.times(singlePoint));
-		if ( countCurrent < countMax ) {
-			alignPoints.add(a);
-			countCurrent = alignPoints.size();
-			Log.i(TAG, "New alignment updated");
-		}
-		if ( countCurrent == countMax && G == null ) {
-			calculateG();
-			Log.i(TAG, "Calculate G transformation");
+		else {
+			Alignment a = new Alignment(X, Y, M.times(singlePoint));
+			if ( countCurrent < countMax ) {
+				alignPoints.add(a);
+				countCurrent = alignPoints.size();
+				Log.i(TAG, "New alignment updated");
+			}
+			if ( countCurrent == countMax ) {
+				Log.i(TAG, "Calculate G transformation");
+				calculateG();
+			}
 		}
 	}
 	
+	public void newAlignment(Matrix S, Matrix M ){
+		if ( status != SPAAMStatus.CALIB_RAW ) {
+			Log.i(TAG, "Not in CALIB_RAW status");
+		}
+		else {
+			Alignment a = new Alignment(S, M.times(singlePoint));
+			if ( countCurrent < countMax ) {
+				alignPoints.add(a);
+				countCurrent = alignPoints.size();
+				Log.i(TAG, "New alignment updated");
+			}
+			if ( countCurrent == countMax ) {
+				Log.i(TAG, "Calculate G transformation");
+				calculateG();
+			}
+		}
+	}
+
+	public void newTuple(Point clickPoint, Matrix M) {
+		if ( status != SPAAMStatus.CALIB_ADD ) {
+			Log.i(TAG, "Not in CALIB_ADD status");
+		}
+		else {
+			Matrix temp = transformScreenPoint.times( G.times( transformSpacePointInv.times( M.times( singlePoint ))));
+			PointTuple pt = new PointTuple( clickPoint, temp );
+			if ( countTuple < countAddMax ) {
+				alignTuples.add(pt);
+				countTuple = alignTuples.size();
+				Log.i(TAG, "New tuple added");
+			}
+			if ( countTuple == countAddMax ) {
+				Log.i(TAG, "Calculate A matrix");
+				calculateA();
+			}
+		}
+	}
+
+	public void newTuple(int X, int Y, Matrix M) {
+		if ( status != SPAAMStatus.CALIB_ADD ) {
+			Log.i(TAG, "Not in CALIB_ADD status");
+		}
+		else {
+			Matrix temp = transformScreenPoint.times( G.times( transformSpacePointInv.times( M.times( singlePoint ))));
+			PointTuple pt = new PointTuple( X, Y, temp );
+			if ( countTuple < countAddMax ) {
+				alignTuples.add(pt);
+				countTuple = alignTuples.size();
+				Log.i(TAG, "New tuple added");
+			}
+			if ( countTuple == countAddMax ) {
+				Log.i(TAG, "Calculate A matrix");
+				calculateA();
+			}
+		}
+	}
+	
+	public void calculateA() {
+		Matrix M = new Matrix(countTuple*2, 4, 0.0);
+		Matrix b = new Matrix(countTuple*2, 1, 0.0);
+		for ( int i = 0; i < countTuple; i++) {
+			PointTuple pt = alignTuples.get(i);
+			M.set( 2*i, 0, pt.clickPoint.x );
+			M.set( 2*i, 2, 1.0);
+			M.set( 2*i+1, 1, pt.clickPoint.y );
+			M.set( 2*i+1, 3, 1.0);
+			b.set( 2*i, 0, pt.calcPoint.x );
+			b.set( 2*i+1, 0, pt.calcPoint.y );
+		}
+
+		Matrix temp = M.solve(b);
+		A = new Matrix(3, 3);
+		A.set(0, 0, temp.get(0, 0));
+		A.set(1, 1, temp.get(1, 0));
+		A.set(0, 2, temp.get(2, 0));
+		A.set(1, 2, temp.get(3, 0));
+		A.set(2, 2, 1.0);
+		status = SPAAMStatus.DONE_ADD;
+		
+		Log.i(TAG, "Matrix A computed");
+		Log.i(TAG, temp.get(0,0) + " " + temp.get(1, 0) + " " + temp.get(2,0) + " " + temp.get(3,0));
+	}
+	
+	public boolean startAddCalib() {
+		if ( status == SPAAMStatus.CALIB_RAW ) {
+			Log.i(TAG, "Not supported for CALIB_RAW status");
+			return false;
+		}			
+		status = SPAAMStatus.CALIB_ADD;
+		countTuple = 0;
+		alignTuples = new ArrayList<PointTuple>();
+		A = null;
+		return true;
+	}
 	
 	public void calculateTransform() {
 		double tempAvg;
@@ -147,11 +355,7 @@ public class SPAAM {
 	}
 	
 	public void calculateG() {
-		if ( singlePoint == null ) {
-			Log.i(TAG, "Single point not set");
-			return;
-		}
-
+		
 		calculateTransform();
 		
 		List<Alignment> alignPointsTrans = new ArrayList<Alignment>();
@@ -199,8 +403,8 @@ public class SPAAM {
 		G.setMatrix(2, 2, 0, 3, eigenVecTranspose.getMatrix(0, 0, 8, 11));
 
 		Log.i(TAG, "Matrix G computed");
-		
-		OK = true;
+
+		status = SPAAMStatus.DONE_RAW;
 		
 //		for ( int i = 0; i < countCurrent; i++ ) {
 //			Alignment at = alignPointsTrans.get(i);
@@ -208,21 +412,57 @@ public class SPAAM {
 //			a.setPointAligned( transformScreenPoint.times(G.times(at.spacePoint)) );
 //		}
 	}
-	
-	public List<Alignment> getList() {
+
+	public List<Alignment> geAlignmenttList() {
 		return alignPoints;
 	}
 	
+	public List<PointTuple> getTupleList() {
+		return alignTuples;
+	}
+	
+	public Matrix getMarkerTrans() {
+		return markerTrans;
+	}
+	
+	public int getAuxiliaryPointsSize() {
+		return auxiliaryPoints.size();
+	}
+		
 	public void updateSreenPointAligned( Matrix T ) {
 		if ( T == null || G == null )
 			return;
 		markerTrans = T;
-		markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
+		switch (status) {
+		case CALIB_RAW:
+			markerPoint = null;
+			break;
+		case DONE_RAW:
+			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
+			Alignment.Normalize(markerPoint);
+			break;
+		case CALIB_ADD:
+			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
+			Alignment.Normalize(markerPoint);
+			break;
+		case DONE_ADD:
+			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
+			Alignment.Normalize(markerPoint);
+			markerPointAdd = A.times(markerPoint);
+			Alignment.Normalize(markerPointAdd);
+			break;
+		}
+		return;
 	}
 
 	public void setMaxAlignment(int max) {
 		countMax = max;
 		countCurrent = 0;
+	}
+	
+	public void setMaxTuple(int max) {
+		countAddMax = max;
+		countTuple = 0;
 	}
 
 	public boolean readFile(File file) {
@@ -248,7 +488,7 @@ public class SPAAM {
 		    	GA[i] = values.get(0);
 		    	values.remove(0);
 		    }
-		    if (values.size() % 7 != 0) {
+		    if (values.size() % 7 != 0 && values.size() / 7 != countMax) {
 		    	Log.e(TAG, "File format wrong");
 		    	return false;
 		    }
@@ -276,7 +516,12 @@ public class SPAAM {
 			transformSpacePointInv = null;
 		    calculateTransform();
 		    values = null;
-		    OK = true;
+		    status = SPAAMStatus.DONE_RAW;
+		    A = null;
+		    alignTuples = null;
+			markerTrans = null;
+			markerPoint = null;
+			markerPointAdd = null;
 		    Log.e(TAG, "File successfully parsed, with " + countMax + " alignmnets");
 		    return true;
 		}
@@ -287,6 +532,10 @@ public class SPAAM {
 	}
 
 	public boolean writeFile(File file) {
+		if ( status == SPAAMStatus.CALIB_RAW ) {
+			Log.i(TAG, "Not supported fir CALIB_RAW status");
+			return false;
+		}
 		try {
 			if (!file.exists())
 				file.createNewFile();

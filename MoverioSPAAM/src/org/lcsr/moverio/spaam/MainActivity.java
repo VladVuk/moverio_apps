@@ -14,6 +14,8 @@ import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.igtlink.IGTLServer;
 import org.lcsr.moverio.spaam.R;
 import org.lcsr.moverio.spaam.util.*;
+import org.lcsr.moverio.spaam.util.SPAAM.SPAAMStatus;
+
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import Jama.Matrix;
 import android.annotation.SuppressLint;
@@ -33,6 +35,7 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends ARActivity {
@@ -44,6 +47,7 @@ public class MainActivity extends ARActivity {
 	private FrameLayout mainLayout;
 	
 	private Button cancelButton;
+	private Button modifyButton;
 	private Button igtlButton;
 	private TextView igtlMessage;
 	private boolean igtlStatus = false;
@@ -52,7 +56,7 @@ public class MainActivity extends ARActivity {
 	private Button readFileButton, writeFileButton;
 	private String filename = "G.txt";
 
-	private SPAAM spaamCalculator = new SPAAM();
+	private SPAAM spaam;
 	
 	private InteractiveView intView;
 	
@@ -67,8 +71,8 @@ public class MainActivity extends ARActivity {
         setContentView(R.layout.main);
 		mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
         
-        spaamCalculator.setSinglePointLocation( 0.0, 0.0, 0.0 );
-        spaamCalculator.setMaxAlignment(6);
+        spaam = new SPAAM( 0.0, 0.0, 0.0 );
+        spaam.setMaxAlignment(20);
         
         ipAddress = getIPAddress();
         ((TextView)this.findViewById(R.id.IPAddressDisp)).setText("IP: " + ipAddress);
@@ -102,20 +106,33 @@ public class MainActivity extends ARActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( !spaamCalculator.cancalLast()) {
+				if ( spaam.cancalLast())
+					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
+				else
 					buildAlertMessageNoCube("You have not made any alignment");
-				}
 			}
         });
+        
+        modifyButton = (Button)this.findViewById(R.id.ModifyButton);
+        modifyButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if ( spaam.startAddCalib() )
+					Toast.makeText(MainActivity.this, "Start additional calibration", Toast.LENGTH_SHORT).show();
+				else
+					Toast.makeText(MainActivity.this, "Cannot start additional calibration", Toast.LENGTH_SHORT).show();		
+			}
+		});        
 
         readFileButton = (Button)this.findViewById(R.id.ReadButton);
         readFileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				File file = new File(Environment.getExternalStorageDirectory(), filename);
-				if ( !spaamCalculator.readFile(file)) {
+				if ( !spaam.readFile(file))
 					buildAlertMessageNoCube("Read file falied");
-				}
+				else
+					Toast.makeText(MainActivity.this, "File loaded", Toast.LENGTH_SHORT).show();
 			}
         });
 
@@ -123,42 +140,44 @@ public class MainActivity extends ARActivity {
         writeFileButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( !spaamCalculator.OK )
+				if ( spaam.status == SPAAMStatus.CALIB_RAW )
 					buildAlertMessageNoCube("SPAAM not done");
 				else {
 					File sdcard = Environment.getExternalStorageDirectory();
 					File file = new File(sdcard, filename);
-					if ( !spaamCalculator.writeFile(file)) {
+					if ( !spaam.writeFile(file))
 						buildAlertMessageNoCube("Write file falied");
-					}
+					else
+						Toast.makeText(MainActivity.this, "File written", Toast.LENGTH_SHORT).show();
 				}
 			}
         });
         
-        
-
         mainLayout.setOnTouchListener(new OnTouchListener() {
         	public boolean onTouch(View v, MotionEvent event) {
+    	    	int x = (int) event.getX();
+                int y = (int) event.getY();
+                Matrix trans = visualTracker.getMarkerTransformation();
+                if ( trans == null ) {
+                	buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
+                	return true;
+                }
         		switch (event.getAction()) {
         	    case MotionEvent.ACTION_DOWN:
-        	    	if ( !spaamCalculator.OK ){
-	        	    	int x = (int) event.getX();
-	                    int y = (int) event.getY();
-						if( visualTracker.getMarkerVisibility() )
-							spaamCalculator.newAlignment(x, y, visualTracker.getMarkerTransformation());
-						else
-							buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
-        	    	}
+        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW )
+						spaam.newAlignment(x, y, trans);
+					else if ( spaam.status == SPAAMStatus.CALIB_ADD )
+						spaam.newTuple(x, y, trans);
 					break;
         	    case MotionEvent.ACTION_UP:
         	        v.performClick();
-        	        break;        	        
+        	        break;
         	    default:
         	        break;
         	    }
         		return true;
-        	}        	
-        });        
+        	}
+        });
     }
     
     @SuppressLint("HandlerLeak")
@@ -173,8 +192,8 @@ public class MainActivity extends ARActivity {
 						+ "Position[2]: " + t.getPositionArray()[2]);
                 break;  
             case 0:  
-                break;  
-            }  
+                break;
+            }
         }  
     };
     
@@ -202,11 +221,8 @@ public class MainActivity extends ARActivity {
 			igtlServer.sendTransform(T);
     	}
     	if ( intView != null  ) {
-    		if ( spaamCalculator.OK ) {
-	    		if ( T != null) {
-	    			spaamCalculator.updateSreenPointAligned(T);
-	    		}
-    		}
+    		if ( spaam.status != SPAAMStatus.CALIB_RAW && T != null )
+    			spaam.updateSreenPointAligned(T);
     		intView.invalidate();
     	}
     }
@@ -235,7 +251,7 @@ public class MainActivity extends ARActivity {
     @Override
     public void onResume() {
     	super.onResume();
-        intView = new InteractiveView(this, spaamCalculator);
+        intView = new InteractiveView(this, spaam);
     	mainLayout.addView(intView);
         intView.setGeometry(640, 480);
         Log.i(TAG, "InteractiveView added");
@@ -246,7 +262,8 @@ public class MainActivity extends ARActivity {
     public void onStop() {
     	super.onStop();
     	mainLayout.removeAllViews();
-    	spaamCalculator.clearSPAAM();
+    	spaam.clearSPAAM();
+    	spaam = null;
     	if ( igtlServer != null ) {
     		igtlServer.stop(); 
     		igtlServer = null;

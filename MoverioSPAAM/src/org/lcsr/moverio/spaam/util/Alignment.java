@@ -130,5 +130,17 @@ public class Alignment {
 			}
 		}
 	}
+
+	public static void Normalize(Matrix m) {
+		if ( m.getColumnDimension() != 1 )
+			return;
+		int size = m.getRowDimension();
+		double c = m.get(size-1, 0);
+		if ( c == 0.0 )
+			return;
+		for (int i = 0; i < size; i++) {
+			m.set(i,0, m.get(i, 0)/c);
+		}
+	}
 	
 }

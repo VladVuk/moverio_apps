@@ -21,18 +21,38 @@
         android:orientation="vertical" >
 
         
-        <Button
-            android:id="@+id/CancelButton"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/def_CancelButton"
-            android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal" >
+
+            <Button
+	            android:id="@+id/CancelButton"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+	            android:text="@string/def_CancelButton"
+	            android:textColor="@android:color/white"
+	            android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/ModifyButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1"
+                android:text="@string/def_ModifyButton"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+        </LinearLayout>
         
+               
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
