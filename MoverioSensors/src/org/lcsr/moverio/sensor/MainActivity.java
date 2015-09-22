@@ -1,7 +1,7 @@
 /*
  *  MainActivity.java
  *  
- *  Author(s): Long Qians
+ *  Author(s): Long Qian
  *	LCSR, Johns Hopkins University
  *
  */
@@ -15,14 +15,14 @@ import android.view.MenuItem;
 
 public class MainActivity extends Activity  {
 
-	private mSensorEventListener sensorEventListener;
+	private Sensors sensorEventListener;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		sensorEventListener = new mSensorEventListener(this);
+		sensorEventListener = new Sensors(this);
 	}
 
 	@Override
