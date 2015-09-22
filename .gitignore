@@ -10,7 +10,7 @@
 */*/bin/*
 */*/gen/*
 */*/bins/*
-*/.settings
+*/.settings/*
 
 !*/lib/*
 !*/libs/*
