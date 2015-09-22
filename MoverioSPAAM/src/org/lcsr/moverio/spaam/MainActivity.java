@@ -191,7 +191,6 @@ public class MainActivity extends ARActivity {
 				});
 		final AlertDialog alert = builder.create();
 		alert.show();
-		Log.i(TAG, "Tag not shown");
 	}
 	
 	

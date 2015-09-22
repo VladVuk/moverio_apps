@@ -252,8 +252,9 @@ public class SPAAM {
 		    	Log.e(TAG, "File format wrong");
 		    	return false;
 		    }
-		    G = new Matrix(GA, 3);
-		    alignPoints = null;
+		    Matrix temp = new Matrix(GA, 4);
+		    G = temp.transpose();
+		    alignPoints = new ArrayList<Alignment>();
 		    int alignCount = values.size() / 7;
 		    for (int i = 0; i < alignCount; i++) {
 		    	Matrix sc = new Matrix(3, 1);
@@ -267,15 +268,20 @@ public class SPAAM {
 		    	sp.set(3, 0, values.get(7*i + 6));
 		    	alignPoints.add(new Alignment(sc, sp));
 		    }
-		    values = null;
-		    OK = true;
 		    countMax = alignCount;
 		    countCurrent = alignCount;
+			transformScreenPoint = null;
+			transformSpacePoint = null;
+			transformScreenPointInv = null;
+			transformSpacePointInv = null;
+		    calculateTransform();
+		    values = null;
+		    OK = true;
 		    Log.e(TAG, "File successfully parsed, with " + countMax + " alignmnets");
 		    return true;
 		}
 		catch (Exception e) {
-		    Log.e(TAG, "Read file failed");
+			e.printStackTrace(System.err);
 		    return false;
 		}
 	}
@@ -287,7 +293,7 @@ public class SPAAM {
 			FileOutputStream of = new FileOutputStream(file);
 			String ss = G.get(0, 0) + " " + G.get(0, 1) + " " + G.get(0, 2) + " " + G.get(0, 3) + System.getProperty("line.separator")
 					  + G.get(1, 0) + " " + G.get(1, 1) + " " + G.get(1, 2) + " " + G.get(1, 3) + System.getProperty("line.separator")
-					  + G.get(1, 0) + " " + G.get(1, 1) + " " + G.get(1, 2) + " " + G.get(1, 3) + System.getProperty("line.separator");
+					  + G.get(2, 0) + " " + G.get(2, 1) + " " + G.get(2, 2) + " " + G.get(2, 3) + System.getProperty("line.separator");
 			of.write(ss.getBytes());
 			for (int i = 0; i < countCurrent; i++) {
 				Matrix sc = alignPoints.get(i).screenPoint;
