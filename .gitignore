@@ -7,8 +7,10 @@
 *.war
 *.ear
 *.jar
-*/bin/*
-*/bins/*
+*/*/bin/*
+*/*/gen/*
+*/*/bins/*
+*/.settings
 
 !*/lib/*
 !*/libs/*
