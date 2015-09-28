@@ -12,6 +12,7 @@ package org.lcsr.moverio.igtlink;
 import org.medcare.igtl.messages.ImageMessage;
 import org.medcare.igtl.network.GenericIGTLinkServer;
 import org.medcare.igtl.network.IOpenIgtPacketListener;
+import org.medcare.igtl.util.PolyData;
 import org.medcare.igtl.util.Status;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import Jama.Matrix;
@@ -121,6 +122,12 @@ public class IGTLServer implements IOpenIgtPacketListener {
 
 	@Override
 	public void onRxNDArray(String name, float[] data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRxPolyData(String arg0, PolyData arg1) {
 		// TODO Auto-generated method stub
 		
 	}

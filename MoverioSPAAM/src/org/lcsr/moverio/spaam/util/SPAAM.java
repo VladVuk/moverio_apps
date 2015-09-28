@@ -139,7 +139,6 @@ public class SPAAM {
 			countTuple = alignTuples.size();
 			A = null;
 			markerPointAdd = null;
-			// TODO: clear additional spaam data
 			Log.i(TAG, "Last tuple alignment removed, additional SPAAM result cleared");
 			break;
 		default:
@@ -201,7 +200,7 @@ public class SPAAM {
 		markerTrans = null;
 		markerPoint = null;
 		markerPointAdd = null;
-		// TODO clear A
+		A = null;
 		Log.i(TAG, "SPAAM cleared");
 	}
 	
@@ -280,24 +279,26 @@ public class SPAAM {
 	}
 	
 	public void calculateA() {
+		double screenWidth = 640.0;
+		double screenHeight = 480.0;
 		Matrix M = new Matrix(countTuple*2, 4, 0.0);
 		Matrix b = new Matrix(countTuple*2, 1, 0.0);
 		for ( int i = 0; i < countTuple; i++) {
 			PointTuple pt = alignTuples.get(i);
-			M.set( 2*i, 0, pt.clickPoint.x );
+			M.set( 2*i, 0, pt.clickPoint.x / screenWidth );
 			M.set( 2*i, 2, 1.0);
-			M.set( 2*i+1, 1, pt.clickPoint.y );
+			M.set( 2*i+1, 1, pt.clickPoint.y / screenHeight );
 			M.set( 2*i+1, 3, 1.0);
-			b.set( 2*i, 0, pt.calcPoint.x );
-			b.set( 2*i+1, 0, pt.calcPoint.y );
+			b.set( 2*i, 0, pt.calcPoint.x / screenWidth );
+			b.set( 2*i+1, 0, pt.calcPoint.y / screenHeight );
 		}
 
 		Matrix temp = M.solve(b);
 		A = new Matrix(3, 3);
 		A.set(0, 0, temp.get(0, 0));
 		A.set(1, 1, temp.get(1, 0));
-		A.set(0, 2, temp.get(2, 0));
-		A.set(1, 2, temp.get(3, 0));
+		A.set(0, 2, temp.get(2, 0)*screenWidth);
+		A.set(1, 2, temp.get(3, 0)*screenHeight);
 		A.set(2, 2, 1.0);
 		status = SPAAMStatus.DONE_ADD;
 		
