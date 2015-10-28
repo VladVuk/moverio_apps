@@ -16,6 +16,7 @@ public class VisualTracker {
 
 	private static final String TAG = "VisualTracker";
 	private int markerID = -1;
+	public boolean visibility = false;
 	
 	private static VisualTracker vInstance;
 	
@@ -36,19 +37,24 @@ public class VisualTracker {
 	}
 
 	public Matrix getMarkerTransformation() {
-    	if (markerID == -1)
+    	if (markerID == -1) {
+    		visibility = false;
     		return null;
+    	}
     	
     	if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
     		float[] floatArray = ARToolKit.getInstance().queryMarkerTransformation(markerID);
 			double[] toDouble = new double[16];
 			for (int i = 0; i < 16; i++ )
 				toDouble[i] = Double.valueOf(floatArray[i]);
+    		visibility = true;
 			return new Matrix(toDouble, 4);
     	}
-    	else
+    	else {
+    		visibility = false;
     		return null;
-    }
+    	}
+	}
 	
 	public float[] getMarkerTransformationGL() {
     	if (markerID == -1)

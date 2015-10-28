@@ -41,9 +41,6 @@ public class SPAAM {
 	private Matrix transformScreenPointInv;
 	private Matrix transformSpacePointInv;
 	
-	private Matrix markerTrans;
-	private Matrix markerPoint;
-	private Matrix markerPointAdd;
 	private List<Point> auxiliaryPoints;
 	
 	
@@ -118,8 +115,6 @@ public class SPAAM {
 			transformScreenPointInv = null;
 			transformSpacePointInv = null;
 			G = null;
-			markerTrans = null;
-			markerPoint = null;
 			Log.i(TAG, "Last alignment removed, SPAAM result cleared");
 			break;
 		case CALIB_ADD:
@@ -138,7 +133,6 @@ public class SPAAM {
 			alignTuples.remove(alignTuples.size()-1);
 			countTuple = alignTuples.size();
 			A = null;
-			markerPointAdd = null;
 			Log.i(TAG, "Last tuple alignment removed, additional SPAAM result cleared");
 			break;
 		default:
@@ -162,21 +156,7 @@ public class SPAAM {
 		else
 			return alignTuples.get(countTuple-1).clickPoint;
 	}
-
-	public Point getMarkerPoint() {
-		if ( markerPoint == null )
-			return null;
-		else
-			return new Point((int)markerPoint.get(0,0), (int)markerPoint.get(1,0));
-	}
 	
-	public Point getMarkerPointAdd() {
-		if ( markerPointAdd == null )
-			return null;
-		else
-			return new Point((int)markerPointAdd.get(0,0), (int)markerPointAdd.get(1,0));
-	}
-
 	public Point getAuxiliaryPoint() {
 		if ( status == SPAAMStatus.CALIB_RAW && countCurrent < auxiliaryPoints.size() )
 			return auxiliaryPoints.get(countCurrent);
@@ -197,9 +177,6 @@ public class SPAAM {
 		countCurrent = 0;
 		countTuple = 0;
 		singlePoint = null;
-		markerTrans = null;
-		markerPoint = null;
-		markerPointAdd = null;
 		A = null;
 		Log.i(TAG, "SPAAM cleared");
 	}
@@ -413,6 +390,37 @@ public class SPAAM {
 //			a.setPointAligned( transformScreenPoint.times(G.times(at.spacePoint)) );
 //		}
 	}
+	
+
+
+	public Point calculateScreenPoint( Matrix T, Matrix spacePoint ) {
+		if ( T == null || G == null )
+			return null;
+		Matrix screenPoint = null;
+		switch (status) {
+		case CALIB_RAW:
+			screenPoint = null;
+			return null;
+		case DONE_RAW:
+			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
+			Alignment.Normalize(screenPoint);
+			break;
+		case CALIB_ADD:
+			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
+			Alignment.Normalize(screenPoint);
+			break;
+		case DONE_ADD:
+			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
+			Alignment.Normalize(screenPoint);
+			screenPoint = A.times(screenPoint);
+			Alignment.Normalize(screenPoint);
+			break;
+		}
+		if ( screenPoint == null )
+			return null;
+		else
+			return new Point((int)(screenPoint.get(0, 0)), (int)(screenPoint.get(1,0)));
+	}
 
 	public List<Alignment> geAlignmenttList() {
 		return alignPoints;
@@ -422,40 +430,10 @@ public class SPAAM {
 		return alignTuples;
 	}
 	
-	public Matrix getMarkerTrans() {
-		return markerTrans;
-	}
-	
 	public int getAuxiliaryPointsSize() {
 		return auxiliaryPoints.size();
 	}
 		
-	public void updateSreenPointAligned( Matrix T ) {
-		if ( T == null || G == null )
-			return;
-		markerTrans = T;
-		switch (status) {
-		case CALIB_RAW:
-			markerPoint = null;
-			break;
-		case DONE_RAW:
-			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
-			Alignment.Normalize(markerPoint);
-			break;
-		case CALIB_ADD:
-			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
-			Alignment.Normalize(markerPoint);
-			break;
-		case DONE_ADD:
-			markerPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( singlePoint ))));
-			Alignment.Normalize(markerPoint);
-			markerPointAdd = A.times(markerPoint);
-			Alignment.Normalize(markerPointAdd);
-			break;
-		}
-		return;
-	}
-
 	public void setMaxAlignment(int max) {
 		countMax = max;
 		countCurrent = 0;
@@ -520,9 +498,6 @@ public class SPAAM {
 		    status = SPAAMStatus.DONE_RAW;
 		    A = null;
 		    alignTuples = null;
-			markerTrans = null;
-			markerPoint = null;
-			markerPointAdd = null;
 		    Log.e(TAG, "File successfully parsed, with " + countMax + " alignmnets");
 		    return true;
 		}

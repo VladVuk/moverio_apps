@@ -64,6 +64,8 @@ public class MainActivity extends ARActivity {
 	
 	private String ipAddress;
 	
+	private Matrix T;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,28 +156,32 @@ public class MainActivity extends ARActivity {
         });
         
         mainLayout.setOnTouchListener(new OnTouchListener() {
-        	public boolean onTouch(View v, MotionEvent event) {
+        	@SuppressLint("ClickableViewAccessibility")
+			public boolean onTouch(View v, MotionEvent event) {
     	    	int x = (int) event.getX();
                 int y = (int) event.getY();
-                Matrix trans = visualTracker.getMarkerTransformation();
-                if ( trans == null ) {
+                T = visualTracker.getMarkerTransformation();
+                transformationChanged();
+                if ( !visualTracker.visibility ) {
                 	buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
                 	return true;
                 }
-        		switch (event.getAction()) {
-        	    case MotionEvent.ACTION_DOWN:
-        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW )
-						spaam.newAlignment(x, y, trans);
-					else if ( spaam.status == SPAAMStatus.CALIB_ADD )
-						spaam.newTuple(x, y, trans);
-					break;
-        	    case MotionEvent.ACTION_UP:
-        	        v.performClick();
-        	        break;
-        	    default:
-        	        break;
-        	    }
-        		return true;
+                else {
+	        		switch (event.getAction()) {
+	        	    case MotionEvent.ACTION_DOWN:
+	        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW )
+							spaam.newAlignment(x, y, T);
+						else if ( spaam.status == SPAAMStatus.CALIB_ADD )
+							spaam.newTuple(x, y, T);
+						break;
+	        	    case MotionEvent.ACTION_UP:
+	        	        v.performClick();
+	        	        break;
+	        	    default:
+	        	        break;
+	        	    }
+	        		return true;
+                }
         	}
         });
     }
@@ -216,15 +222,18 @@ public class MainActivity extends ARActivity {
     
     @Override
     public void onFrameProcessed() {
-		Matrix T = visualTracker.getMarkerTransformation();
+		T = visualTracker.getMarkerTransformation();
+		transformationChanged();
+    }
+    
+    public void transformationChanged() {
     	if ( T != null && igtlStatus ) {
 			igtlServer.sendTransform(T);
     	}
     	if ( intView != null  ) {
-    		if ( spaam.status != SPAAMStatus.CALIB_RAW && T != null )
-    			spaam.updateSreenPointAligned(T);
+			intView.updateTransformation(T);
     		intView.invalidate();
-    	}
+    	}    	
     }
     
     
