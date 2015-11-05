@@ -1,0 +1,12 @@
+<resources>
+
+    <string name="app_name">MoverioSPAAM</string>
+    <string name="def_IGTButton">OpenIGTLink Start</string>
+    <string name="def_ipAddress">IP Address</string>
+    <string name="def_IGTDisp"></string>
+    <string name="def_CancelButton">Cancel Last</string>
+    <string name="def_ReadButton">Read File</string>
+    <string name="def_WriteButton">Write File</string>
+    <string name="def_ModifyButton">Modify</string>
+    
+</resources>

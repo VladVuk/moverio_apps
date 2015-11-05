@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MOVERIO_ROS</string>
+    <string name="imageView">imageView</string>
+    <string name="switch_camera_button_text">Switch Camera</string>
+</resources>
