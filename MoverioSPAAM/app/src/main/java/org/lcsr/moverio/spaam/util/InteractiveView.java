@@ -102,6 +102,7 @@ public class InteractiveView extends View {
 		case CALIB_ADD:
 			drawPoint(paint, canvas, PointType.PointCursorAdd);
 			drawText(paint, canvas, "Additional Alignments: " + spaam.countTuple + " / " + spaam.countAddMax);
+			drawSquareBorder(paint, canvas);
 			drawPoint(paint, canvas, PointType.PointAlign);
 			break;
 		case DONE_ADD:

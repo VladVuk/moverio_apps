@@ -243,7 +243,7 @@ public class SPAAM {
 	}
 
 	public void newTuple(int X, int Y, Matrix M) {
-		if ( status != SPAAMStatus.CALIB_ADD ) {
+		if ( status != SPAAMStatus.CALIB_ADD && status != SPAAMStatus.DONE_ADD ) {
 			Log.i(TAG, "Not in CALIB_ADD status");
 		}
 		else {
@@ -272,12 +272,12 @@ public class SPAAM {
 		Matrix b = new Matrix(countTuple*2, 1, 0.0);
 		for ( int i = 0; i < countTuple; i++) {
 			PointTuple pt = alignTuples.get(i);
-			M.set( 2*i, 0, pt.clickPoint.x / screenWidth );
+			M.set( 2*i, 0, pt.calcPoint.x / screenWidth );
 			M.set( 2*i, 2, 1.0);
-			M.set( 2*i+1, 1, pt.clickPoint.y / screenHeight );
+			M.set( 2*i+1, 1, pt.calcPoint.y / screenHeight );
 			M.set( 2*i+1, 3, 1.0);
-			b.set( 2*i, 0, pt.calcPoint.x / screenWidth );
-			b.set( 2*i+1, 0, pt.calcPoint.y / screenHeight );
+			b.set( 2*i, 0, pt.clickPoint.x / screenWidth );
+			b.set( 2*i+1, 0, pt.clickPoint.y / screenHeight );
 		}
 
 		Matrix temp = M.solve(b);
