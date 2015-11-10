@@ -108,7 +108,7 @@ public class MainActivity extends ARActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( spaam.cancalLast())
+				if ( spaam.cancelLast())
 					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
 				else
 					buildAlertMessageNoCube("You have not made any alignment");
@@ -171,7 +171,7 @@ public class MainActivity extends ARActivity {
 	        	    case MotionEvent.ACTION_DOWN:
 	        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW )
 							spaam.newAlignment(x, y, T);
-						else if ( spaam.status == SPAAMStatus.CALIB_ADD )
+						else if ( spaam.status == SPAAMStatus.CALIB_ADD || spaam.status == SPAAMStatus.DONE_ADD )
 							spaam.newTuple(x, y, T);
 						break;
 	        	    case MotionEvent.ACTION_UP:

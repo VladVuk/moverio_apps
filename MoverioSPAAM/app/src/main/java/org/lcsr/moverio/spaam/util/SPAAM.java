@@ -93,7 +93,7 @@ public class SPAAM {
         singlePoint = new Matrix( singlePointArray, 4);
 	}	
 	
-	public boolean cancalLast() {
+	public boolean cancelLast() {
 		switch ( status ) {
 		case CALIB_RAW:
 			if ( countCurrent == 0 ) {
@@ -119,7 +119,7 @@ public class SPAAM {
 			break;
 		case CALIB_ADD:
 			if ( countTuple == 0 ) {
-				Log.i(TAG, "None tuple alignment mede");
+				Log.i(TAG, "None tuple alignment made");
 				return false;
 			}
 			else {
@@ -129,11 +129,17 @@ public class SPAAM {
 				break;
 			}
 		case DONE_ADD:
-			status = SPAAMStatus.CALIB_ADD;
 			alignTuples.remove(alignTuples.size()-1);
 			countTuple = alignTuples.size();
-			A = null;
-			Log.i(TAG, "Last tuple alignment removed, additional SPAAM result cleared");
+			if ( countTuple < countAddMax ) {
+				status = SPAAMStatus.CALIB_ADD;
+				A = null;
+				Log.i(TAG, "Last tuple alignment removed, additional SPAAM result unavailable");
+			}
+			else {
+				Log.i(TAG, "Recalculate A matrix");
+				calculateA();
+			}
 			break;
 		default:
 			break;
@@ -243,12 +249,16 @@ public class SPAAM {
 		else {
 			Matrix temp = transformScreenPoint.times( G.times( transformSpacePointInv.times( M.times( singlePoint ))));
 			PointTuple pt = new PointTuple( X, Y, temp );
-			if ( countTuple < countAddMax ) {
-				alignTuples.add(pt);
-				countTuple = alignTuples.size();
-				Log.i(TAG, "New tuple added");
+			for ( int i = 0; i < countTuple; i++ ) {
+				if (alignTuples.get(i).closeTo(pt)) {
+					alignTuples.remove(i);
+					break;
+				}
 			}
-			if ( countTuple == countAddMax ) {
+			alignTuples.add(pt);
+			countTuple = alignTuples.size();
+			Log.i(TAG, "New tuple added");
+			if ( countTuple >= countAddMax ) {
 				Log.i(TAG, "Calculate A matrix");
 				calculateA();
 			}
@@ -287,7 +297,7 @@ public class SPAAM {
 		if ( status == SPAAMStatus.CALIB_RAW ) {
 			Log.i(TAG, "Not supported for CALIB_RAW status");
 			return false;
-		}			
+		}
 		status = SPAAMStatus.CALIB_ADD;
 		countTuple = 0;
 		alignTuples = new ArrayList<PointTuple>();
@@ -399,7 +409,6 @@ public class SPAAM {
 		Matrix screenPoint = null;
 		switch (status) {
 		case CALIB_RAW:
-			screenPoint = null;
 			return null;
 		case DONE_RAW:
 			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));

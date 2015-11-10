@@ -41,8 +41,8 @@ public class InteractiveView extends View {
 	
 	private List<Point> centerPoints;
 	private Matrix singlePoint;
-	private List<Matrix> squareSpacePoints;
-	private List<Point> squareScreenPoints;
+	private List<Matrix> squareSpacePoints; // length = 4
+	private List<Point> squareScreenPoints; // length = 4
 	private boolean visibility = false;
 	
 	public static enum PointType {PointCursor, PointCursorAdd, PointAlign, PointAlignAdd};
@@ -91,7 +91,7 @@ public class InteractiveView extends View {
 		case CALIB_RAW:
 			drawPoint(paint, canvas, PointType.PointCursor);
 			drawText(paint, canvas, "Current Alignments: " + spaam.countCurrent + " / " + spaam.countMax);
-			drawAuxiliaryCircle(paint, canvas);
+//			drawAuxiliaryCircle(paint, canvas);
 			break;
 		case DONE_RAW:
 			drawText(paint, canvas, "SPAAM done");
@@ -105,7 +105,7 @@ public class InteractiveView extends View {
 			drawPoint(paint, canvas, PointType.PointAlign);
 			break;
 		case DONE_ADD:
-			drawText(paint, canvas, "Additional SPAAM done");
+			drawText(paint, canvas, "Additional SPAAM done: " + spaam.countTuple);
 			//drawSquare(paint, canvas);
 			drawSquareBorder(paint, canvas);
 			drawPoint(paint, canvas, PointType.PointAlignAdd);
@@ -227,7 +227,7 @@ public class InteractiveView extends View {
 			paint.setColor(Color.parseColor("#CD5C5C"));
 			canvas.drawCircle(cursorPoint.x, cursorPoint.y, pointRadius, paint);
 		}
-		else {
+		else if ( type == PointType.PointAlignAdd ){
 			drawPointList(paint, canvas, Color.MAGENTA);
 		}
 	}

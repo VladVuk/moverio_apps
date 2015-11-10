@@ -21,4 +21,13 @@ public class PointTuple {
 		clickPoint = new Point(x, y);
 		calcPoint = new Point((int)(pb.get(0, 0) / pb.get(2, 0)), (int)(pb.get(1, 0) / pb.get(2, 0)));
 	}
+
+	public boolean closeTo(PointTuple pt) {
+		double dist = (pt.calcPoint.x - calcPoint.x) * (pt.calcPoint.x - calcPoint.x)
+				+ (pt.calcPoint.y - calcPoint.y) * (pt.calcPoint.y - calcPoint.y);
+		if ( dist < 4.0 )
+			return true;
+		else
+			return false;
+	}
 }
