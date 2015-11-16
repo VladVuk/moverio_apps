@@ -38,10 +38,10 @@ public class MainRenderer extends ARRenderer {
     
     public void draw(GL10 gl) {
     	gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-//    	if ( visualTracker.visibility ) {
-//	    	glRenderer.draw(gl);
+    	if ( visualTracker.visibility ) {
+	    	glRenderer.draw(gl);
 //	    	vtkRenderer.draw(gl);
-//    	}
+    	}
 //    	else
 //    		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
     }
