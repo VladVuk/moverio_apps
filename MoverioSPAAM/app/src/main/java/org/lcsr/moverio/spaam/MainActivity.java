@@ -229,6 +229,7 @@ public class MainActivity extends ARActivity {
 		transformationChanged();
         if ( spaam.updated ) {
             renderer.updateCalibMat(spaam.getCalibMat());
+			spaam.updated = false;
         }
     }
     

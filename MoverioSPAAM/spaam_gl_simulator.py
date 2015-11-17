@@ -24,7 +24,7 @@ import OpenGL.GLUT as glut
 
 # If InMeter is true, the unit for everything is meter.
 # Otherwise, millimeter.
-InMeter = True
+InMeter = False
 
 # The position of the cube in world coordinates.
 CubeCenter = np.array([[0.0],[0.0],[0.0],[1.0]])
@@ -32,9 +32,18 @@ CubeLength = 20.0
 
 
 # A sample calibration CalibrationMatrix
-CalibrationMatrix = np.array([[2.252878021669723, -0.10538776507100311, -0.5965160927643689, 103.41611586300415],\
-						   [-0.07101499886683971, -2.2859606682614597, -0.18670062856834455, 23.575374227550363],\
-						   [-0.0001641127538991904, -0.0002442042492526862, -0.0008260820327195535, 0.000027671832411202413]])
+# CalibrationMatrix = np.array([[2.252878021669723, -0.10538776507100311, -0.5965160927643689, 103.41611586300415],\
+# 						   [-0.07101499886683971, -2.2859606682614597, -0.18670062856834455, 23.575374227550363],\
+# 						   [-0.0001641127538991904, -0.0002442042492526862, -0.0008260820327195535, 0.000027671832411202413]])
+
+# Another possible calibration matrix
+# CalibrationMatrix = np.array([[-2.7159485335934357, -0.0014938360164294191, 0.7440388536997122, -115.47160933857211],
+# 							[-1.8082579312160302E-5, 2.6440062702707126, 0.23924594027458754, -31.169444938835202],
+# 							[7.888564506953308E-6, 1.0805111431645914E-5, 0.0010603382586340745, 0.006774942350076085]])
+CalibrationMatrix = np.array([[2.286139238334763, 0.0070415398909735895, -0.604805223461732, 105.14202332183234],
+							[-0.05621397423572271, -2.232857213864352, -0.1760644170151926, 25.838689031762023],
+							[-2.2861000742183536E-4, -1.1084245778509513E-5, -7.927780889265074E-4, 0.014188381718983789]])
+
 
 # A sample transformation matrix of the AR tag
 TransformationMatrix = np.array([[0.95015115, -0.31156227, 0.009452152, -163.45354],
@@ -61,8 +70,8 @@ if InMeter:
 # Window and viewing geometry
 height = 480
 width = 640
-zNear = 0.01
-zFar = 100.0
+zNear = 0.1
+zFar = 1000.0
 
 
 
@@ -75,6 +84,10 @@ def computeProjectionMatrix(CalibMat):
 	<ProjMat> depends on calibration matrix, near and far clipping
 	plan which helps OpenGL z-buffer to work.
 	'''
+	sign = 1
+	if CalibMat[0,3] < 0 and CalibMat[1,3] < 0:
+		sign = -1
+		print "Inverse sign"
 	LeftMat = np.zeros([4,3], dtype=np.float32)
 	LeftMat[0,0] = 1.0
 	LeftMat[1,1] = 1.0
@@ -84,7 +97,7 @@ def computeProjectionMatrix(CalibMat):
 	RightMat[2,3] = zFar*zNear
 	if InMeter:
 		RightMat[2,3] /= 1000.0
-	ProjMat = LeftMat.dot(CalibMat) + RightMat
+	ProjMat = LeftMat.dot(CalibMat * sign) + RightMat
 	return ProjMat
 
 
@@ -142,7 +155,7 @@ def computeScreenCoordinates(p, TransMat, ProjMat, OrthoMat, CalibMat):
 		print "Point will not be displayed on screen."
 	else:
 		print "Point normalized device coordinate is:", ps1.T
-	ps2 = CalibMat.dot(p)
+	ps2 = CalibMat.dot(TransMat.dot(p))
 	ps2 = ps2 / ps2[2]
 	print "By SPAAM >>>"
 	print "Point screen coordinate is:", ps2[0], ps2[1]
@@ -212,6 +225,7 @@ def keyboard( key, x, y ):
 
 
 ProjectionMatrix = computeProjectionMatrix(CalibrationMatrix)
+print ProjectionMatrix
 glut.glutInit()
 glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGBA)
 glut.glutCreateWindow('SPAAM OpenGL Simulator')

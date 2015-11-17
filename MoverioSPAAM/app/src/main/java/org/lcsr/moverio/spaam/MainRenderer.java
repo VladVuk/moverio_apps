@@ -34,11 +34,11 @@ public class MainRenderer extends ARRenderer {
     private float zNear = 0.1f;
     private float zFar = 1000.0f;
 
-    private float[] glProj = null;
-//                            {2.25287802167f, -0.0710149988668f, 0.164145578453f, -0.000164112753899f,
-//                            -0.105387765071f, -2.28596066826f, 0.244253093084f, -0.000244204249253f,
-//                            -0.596516092764f, -0.186700628568f, 0.82624725921f, -0.00082608203272f,
-//                            103.416115863f, 23.5753742276f, 199.972322633f, 0.0000276718324112f};
+    private float[] glProj =
+                            {2.25287802167f, -0.0710149988668f, 0.164145578453f, -0.000164112753899f,
+                            -0.105387765071f, -2.28596066826f, 0.244253093084f, -0.000244204249253f,
+                            -0.596516092764f, -0.186700628568f, 0.82624725921f, -0.00082608203272f,
+                            103.416115863f, 23.5753742276f, 199.972322633f, 0.0000276718324112f};
 
     private Matrix Util = null;
 
@@ -67,7 +67,7 @@ public class MainRenderer extends ARRenderer {
     }
 
     public void updateUtilMat() {
-        Util = new Matrix(4,4);
+        Util = new Matrix(4,3);
         Util.set(0, 0, 1.0);
         Util.set(1, 1, 1.0);
         Util.set(3, 2, 1.0);
@@ -79,8 +79,17 @@ public class MainRenderer extends ARRenderer {
             glProj = null;
         }
         else {
+//            Log.i(TAG, "M1: " + M.get(0, 0) + ", " + M.get(0, 1) + ", " + M.get(0, 2) + ", " + M.get(0, 3));
+//            Log.i(TAG, "M2: " + M.get(1, 0) + ", " + M.get(1, 1) + ", " + M.get(1, 2) + ", " + M.get(1, 3));
+//            Log.i(TAG, "M3: " + M.get(2, 0) + ", " + M.get(2,1) + ", " + M.get(2,2) + ", " + M.get(2, 3));
             Matrix P = Util.times(M);
+            if (M.get(0,3) < 0 && M.get(1,3) < 0)
+                P = P.times(-1.0);
             P.set(2, 3, P.get(2, 3) + zFar * zNear);
+            Log.i(TAG, "P1: " + P.get(0,0) + ", " + P.get(0,1) + ", " + P.get(0,2) + ", " + P.get(0,3));
+            Log.i(TAG, "P2: " + P.get(1,0) + ", " + P.get(1,1) + ", " + P.get(1,2) + ", " + P.get(1,3));
+            Log.i(TAG, "P3: " + P.get(2,0) + ", " + P.get(2,1) + ", " + P.get(2,2) + ", " + P.get(2,3));
+            Log.i(TAG, "P4: " + P.get(3,0) + ", " + P.get(3,1) + ", " + P.get(3,2) + ", " + P.get(3,3));
             glProj = Matrix2GLArray(P);
         }
     }
@@ -91,7 +100,7 @@ public class MainRenderer extends ARRenderer {
         float[] fa = new float[col*row];
         for ( int i = 0; i < col; i++ ) {
             for ( int j = 0; j < row; j++ ) {
-                fa[i*row+j] = (float)(M.get(i,j));
+                fa[i*row+j] = (float)(M.get(j,i));
             }
         }
         return fa;
@@ -110,6 +119,10 @@ public class MainRenderer extends ARRenderer {
 
         float[] trans = visualTracker.getMarkerTransformationGL();
     	if ( trans != null && glProj != null ) {
+//            Log.i(TAG, "glProj1: " + glProj[0] + ", " + glProj[1] + ", " + glProj[2] + ", " + glProj[3]);
+//            Log.i(TAG, "glProj2: " + glProj[4] + ", " + glProj[5] + ", " + glProj[6] + ", " + glProj[7]);
+//            Log.i(TAG, "glProj3: " + glProj[8] + ", " + glProj[9] + ", " + glProj[10] + ", " + glProj[11]);
+//            Log.i(TAG, "glProj4: " + glProj[12] + ", " + glProj[13] + ", " + glProj[14] + ", " + glProj[15]);
             gl.glViewport(0, 0, width, height);
 
             gl.glMatrixMode(GL10.GL_PROJECTION);
