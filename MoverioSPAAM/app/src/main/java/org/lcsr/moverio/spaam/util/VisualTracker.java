@@ -16,17 +16,13 @@ public class VisualTracker {
 
 	private static final String TAG = "VisualTracker";
 	private int markerID = -1;
+
+    // visibility is for temporary storing, safety not guaranteed
+    // can be used right after getTransformation function is called
 	public boolean visibility = false;
-	
-	private static VisualTracker vInstance;
-	
-	public static VisualTracker getInstance() {
-		return vInstance;
-	}
-	
+
 	public VisualTracker() {
-		Log.i(TAG, "Dummy VisualTracker object created");
-		vInstance = this;
+		Log.i(TAG, "Object constructed");
 	}
 	
 	public void setMarker(String param) {
@@ -57,17 +53,23 @@ public class VisualTracker {
 	}
 	
 	public float[] getMarkerTransformationGL() {
-    	if (markerID == -1)
-    		return null;
+    	if (markerID == -1) {
+			visibility = false;
+			return null;
+		}
     	
     	if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
+			visibility = true;
     		return ARToolKit.getInstance().queryMarkerTransformation(markerID);
     	}
-    	else
-    		return null;
+    	else {
+			visibility = false;
+			return null;
+		}
     }
 	
 	public boolean getMarkerVisibility() {
-		return ARToolKit.getInstance().queryMarkerVisible(markerID);
-	}
+		visibility = ARToolKit.getInstance().queryMarkerVisible(markerID);
+	    return visibility;
+    }
 }

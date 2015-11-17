@@ -22,10 +22,11 @@ import Jama.*;
 public class SPAAM {
 	
 	private static String TAG = "SPAAM";
-	public static enum SPAAMStatus {CALIB_RAW, DONE_RAW, CALIB_ADD, DONE_ADD};
+	public enum SPAAMStatus {CALIB_RAW, DONE_RAW, CALIB_ADD, DONE_ADD};
 	public SPAAMStatus status;
 	private Matrix G;
 	private Matrix A;
+    private float[] GLProjection;
 	
 	public int countMax = 20;
 	public int countAddMax = 4;
@@ -36,12 +37,10 @@ public class SPAAM {
 	private List<PointTuple> alignTuples;
 	
 	private Matrix singlePoint;
-	private Matrix transformScreenPoint;
-	private Matrix transformSpacePoint;
-	private Matrix transformScreenPointInv;
-	private Matrix transformSpacePointInv;
 	
 	private List<Point> auxiliaryPoints;
+
+    public boolean updated = false;
 	
 	
 	public SPAAM( Matrix point ) {
@@ -62,7 +61,7 @@ public class SPAAM {
 	
 	public SPAAM( ) {
 		setupAuxiliaryPoints();
-		setSinglePointLocation( 0.0, 0.0, 0.0 );
+		setSinglePointLocation(0.0, 0.0, 0.0);
 		alignPoints = new ArrayList<Alignment>();
 		status = SPAAMStatus.CALIB_RAW;
 		Log.i(TAG, "SPAAM initialized");
@@ -110,11 +109,8 @@ public class SPAAM {
 			status = SPAAMStatus.CALIB_RAW;
 			alignPoints.remove(alignPoints.size()-1);
 			countCurrent = alignPoints.size();
-			transformScreenPoint = null;
-			transformSpacePoint = null;
-			transformScreenPointInv = null;
-			transformSpacePointInv = null;
 			G = null;
+            updated = true;
 			Log.i(TAG, "Last alignment removed, SPAAM result cleared");
 			break;
 		case CALIB_ADD:
@@ -134,6 +130,7 @@ public class SPAAM {
 			if ( countTuple < countAddMax ) {
 				status = SPAAMStatus.CALIB_ADD;
 				A = null;
+                updated = true;
 				Log.i(TAG, "Last tuple alignment removed, additional SPAAM result unavailable");
 			}
 			else {
@@ -173,10 +170,6 @@ public class SPAAM {
 	public void clearSPAAM() {
 		alignPoints = null;
 		alignTuples = null;
-		transformScreenPoint = null;
-		transformSpacePoint = null;
-		transformScreenPointInv = null;
-		transformSpacePointInv = null;
 		auxiliaryPoints = null;
 		G = null;
 		status = SPAAMStatus.CALIB_RAW;
@@ -228,7 +221,7 @@ public class SPAAM {
 			Log.i(TAG, "Not in CALIB_ADD status");
 		}
 		else {
-			Matrix temp = transformScreenPoint.times( G.times( transformSpacePointInv.times( M.times( singlePoint ))));
+			Matrix temp = G.times( M.times( singlePoint ));
 			PointTuple pt = new PointTuple( clickPoint, temp );
 			if ( countTuple < countAddMax ) {
 				alignTuples.add(pt);
@@ -247,7 +240,7 @@ public class SPAAM {
 			Log.i(TAG, "Not in CALIB_ADD status");
 		}
 		else {
-			Matrix temp = transformScreenPoint.times( G.times( transformSpacePointInv.times( M.times( singlePoint ))));
+			Matrix temp = G.times( M.times( singlePoint ));
 			PointTuple pt = new PointTuple( X, Y, temp );
 			for ( int i = 0; i < countTuple; i++ ) {
 				if (alignTuples.get(i).closeTo(pt)) {
@@ -291,6 +284,7 @@ public class SPAAM {
 		
 		Log.i(TAG, "Matrix A computed");
 		Log.i(TAG, temp.get(0,0) + " " + temp.get(1, 0) + " " + temp.get(2,0) + " " + temp.get(3,0));
+        updated = true;
 	}
 	
 	public boolean startAddCalib() {
@@ -304,11 +298,18 @@ public class SPAAM {
 		A = null;
 		return true;
 	}
-	
-	public void calculateTransform() {
+
+	public void calculateG() {
+		// Preparing calculation of G
+
+		Matrix transformScreenPoint;
+		Matrix transformSpacePoint;
+		Matrix transformScreenPointInv;
+		Matrix transformSpacePointInv;
+
 		double tempAvg;
 		double tempNorm;
-		
+
 		// transformScreenPoint
 		transformScreenPoint = new Matrix(3, 3, 0.0);
 		tempAvg = Alignment.avg(alignPoints, 0, Alignment.PointType.Screen);
@@ -320,7 +321,7 @@ public class SPAAM {
 		transformScreenPoint.set(1, 2, tempAvg);
 		transformScreenPoint.set(1, 1, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		transformScreenPoint.set(2, 2, 1.0);
-		
+
 		// transformSpacePoint
 		transformSpacePoint = new Matrix(4, 4, 0.0);
 		tempAvg = Alignment.avg(alignPoints, 0, Alignment.PointType.Space);
@@ -336,16 +337,13 @@ public class SPAAM {
 		transformSpacePoint.set(2, 3, tempAvg);
 		transformSpacePoint.set(2, 2, Math.sqrt(tempNorm - countCurrent * tempAvg * tempAvg ));
 		transformSpacePoint.set(3, 3, 1.0);
-		
+
 		// calculate transformation inverse
 		transformScreenPointInv = transformScreenPoint.inverse();
 		transformSpacePointInv = transformSpacePoint.inverse();
-	}
-	
-	public void calculateG() {
-		
-		calculateTransform();
-		
+
+
+		// calculate G_core
 		List<Alignment> alignPointsTrans = new ArrayList<Alignment>();
 		for ( int i = 0; i < countCurrent; i++ ) {
 			Alignment a = alignPoints.get(i);
@@ -385,53 +383,51 @@ public class SPAAM {
 		SingularValueDecomposition svd = B.svd();
 		Matrix eigenVecTranspose = svd.getV().getMatrix(0, 11, 11, 11).transpose();
 
-		G = new Matrix(3, 4);
-		G.setMatrix(0, 0, 0, 3, eigenVecTranspose.getMatrix(0, 0, 0, 3));
-		G.setMatrix(1, 1, 0, 3, eigenVecTranspose.getMatrix(0, 0, 4, 7));
-		G.setMatrix(2, 2, 0, 3, eigenVecTranspose.getMatrix(0, 0, 8, 11));
+		Matrix GCore = new Matrix(3, 4);
+        GCore.setMatrix(0, 0, 0, 3, eigenVecTranspose.getMatrix(0, 0, 0, 3));
+		GCore.setMatrix(1, 1, 0, 3, eigenVecTranspose.getMatrix(0, 0, 4, 7));
+		GCore.setMatrix(2, 2, 0, 3, eigenVecTranspose.getMatrix(0, 0, 8, 11));
+
+        G = new Matrix(3, 4);
+        G = transformScreenPoint.times( GCore.times( transformSpacePointInv));
 
 		Log.i(TAG, "Matrix G computed");
 
 		status = SPAAMStatus.DONE_RAW;
-		
-//		for ( int i = 0; i < countCurrent; i++ ) {
-//			Alignment at = alignPointsTrans.get(i);
-//			Alignment a = alignPoints.get(i);
-//			a.setPointAligned( transformScreenPoint.times(G.times(at.spacePoint)) );
-//		}
+        updated = true;
 	}
-	
+
+    public Matrix getCalibMat() {
+        switch (status) {
+            case CALIB_RAW:
+                return null;
+            case DONE_RAW:
+                return G;
+            case CALIB_ADD:
+                return G;
+            case DONE_ADD:
+                return A.times(G);
+        }
+        return null;
+    }
 
 
 	public Point calculateScreenPoint( Matrix T, Matrix spacePoint ) {
 		if ( T == null || G == null )
 			return null;
-		Matrix screenPoint = null;
-		switch (status) {
-		case CALIB_RAW:
-			return null;
-		case DONE_RAW:
-			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
-			Alignment.Normalize(screenPoint);
-			break;
-		case CALIB_ADD:
-			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
-			Alignment.Normalize(screenPoint);
-			break;
-		case DONE_ADD:
-			screenPoint = transformScreenPoint.times( G.times( transformSpacePointInv.times( T.times( spacePoint ))));
-			Alignment.Normalize(screenPoint);
-			screenPoint = A.times(screenPoint);
-			Alignment.Normalize(screenPoint);
-			break;
-		}
+        Matrix GorGA = getCalibMat();
+        Matrix screenPoint = null;
+        if ( GorGA != null ) {
+            screenPoint = GorGA.times(T.times(spacePoint));
+            Alignment.Normalize(screenPoint);
+        }
 		if ( screenPoint == null )
 			return null;
 		else
 			return new Point((int)(screenPoint.get(0, 0)), (int)(screenPoint.get(1,0)));
 	}
 
-	public List<Alignment> geAlignmenttList() {
+	public List<Alignment> getAlignmenttList() {
 		return alignPoints;
 	}
 	
@@ -498,15 +494,11 @@ public class SPAAM {
 		    }
 		    countMax = alignCount;
 		    countCurrent = alignCount;
-			transformScreenPoint = null;
-			transformSpacePoint = null;
-			transformScreenPointInv = null;
-			transformSpacePointInv = null;
-		    calculateTransform();
 		    values = null;
 		    status = SPAAMStatus.DONE_RAW;
 		    A = null;
 		    alignTuples = null;
+            updated = true;
 		    Log.e(TAG, "File successfully parsed, with " + countMax + " alignmnets");
 		    return true;
 		}

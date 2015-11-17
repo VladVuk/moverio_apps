@@ -42,7 +42,7 @@ public class MainActivity extends ARActivity {
 
 	private static String TAG = "MainActivity";
 
-	private MainRenderer renderer = new MainRenderer();
+	private MainRenderer renderer;
 
 	private FrameLayout mainLayout;
 	
@@ -60,7 +60,7 @@ public class MainActivity extends ARActivity {
 	
 	private InteractiveView intView;
 	
-	private VisualTracker visualTracker = new VisualTracker();	
+	private VisualTracker visualTracker;
 	
 	private String ipAddress;
 	
@@ -69,12 +69,15 @@ public class MainActivity extends ARActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-      
-        setContentView(R.layout.main);
-		mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
-        
+		visualTracker = new VisualTracker();
         spaam = new SPAAM( 0.0, 0.0, 0.0 );
         spaam.setMaxAlignment(20);
+		renderer = new MainRenderer(visualTracker);
+
+
+        setContentView(R.layout.main);
+		mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
+
         
         ipAddress = getIPAddress();
         ((TextView)this.findViewById(R.id.IPAddressDisp)).setText("IP: " + ipAddress);
@@ -224,6 +227,9 @@ public class MainActivity extends ARActivity {
     public void onFrameProcessed() {
 		T = visualTracker.getMarkerTransformation();
 		transformationChanged();
+        if ( spaam.updated ) {
+            renderer.updateCalibMat(spaam.getCalibMat());
+        }
     }
     
     public void transformationChanged() {
