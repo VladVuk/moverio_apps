@@ -1,9 +1,7 @@
 # MoverioStereo
 
-Author: Long Qian
-
-Copyright: LCSR, Johns Hopkins University
-
+Author: Long Qian<br>
+Copyright: LCSR, Johns Hopkins University<br>
 This application is demo of 3D display using [OpenGL ES](https://www.khronos.org/opengles/) on Moverio BT200.
 
 ## What's special
@@ -13,19 +11,13 @@ The 3D mode of Moverio BT200 simply splits the screen and displays the left half
 
 ## Moverio BT200 3D Mode
 If a 2D display looks like this:
-<p align="center">
-  ![alt text](./assets/resize.jpg "2D image")
-</p>
+<center><img src="assets/resize.jpg" ></center>
 
 Then, in 3D mode, image for left screen and right screen will be:
-<p align="center">
-  ![alt text](./assets/sbs.jpg "image for both screen")
-</p>
+<center><img src="assets/sbs.jpg" ></center>
 
 The overall 3D effects will be like this (__not exactly__):
-<p align="center">
-  ![alt text](./assets/total.jpg "3d effect")
-</p>
+<center><img src="assets/total.jpg" ></center>
 
 ## Render Pipeline
 1. Create two __FrameBuffer__ object
@@ -43,10 +35,10 @@ The overall 3D effects will be like this (__not exactly__):
 * To enable 2D rendering, using following code:
 ``` java
 gl.glViewport(0, 0, width, height);
+# width and height should be equal to hardware dimension.
 gl.glMatrixMode(GL10.GL_PROJECTION);
 gl.glLoadIdentity();
 gl.glOrthof(-width / 2, width / 2, -height / 2, height / 2, -1000f, 1000f);
 ```
-Note: `width` and `height` should be equal to hardware dimension.
 * `x, y` offset in`glViewport` should be carefully chosen for __Pass 1__ and __Pass 2__, so that texture image (960, 492) is not scaled and be stored at the correct position in framebuffer (1024, 512).
 
