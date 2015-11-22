@@ -1,58 +1,153 @@
 package org.lcsr.moverio.stereo;
 
+/**
+ * Created by qian on 11/20/15.
+ */
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
-class Cube
-{
+import android.opengl.GLES10;
 
-	private IntBuffer mVertexBuffer;
-	private IntBuffer mColorBuffer;
-	private ByteBuffer mIndexBuffer;
+/**
+ * Simple class to render a coloured cube.
+ */
+public class Cube {
 
-	public Cube()
-	{
-		int one = 0x10000;
-		int vertices[] =
-		{ -one, -one, -one, one, -one, -one, one, one, -one, -one, one, -one,
-				-one, -one, one, one, -one, one, one, one, one, -one, one, one, };
+    private float SIZE = 1.0f;
 
-		int colors[] =
-		{ 0, 0, 0, one, one, 0, 0, one, one, one, 0, one, 0, one, 0, one, 0, 0,
-				one, one, one, 0, one, one, one, one, one, one, 0, one, one,
-				one, };
+    private FloatBuffer	vertexBuffer, textureBuffer;
+    float[] vertices, texture;
+    private ByteBuffer	indexBuffer;
+    byte[] indices;
 
-		byte indices[] =
-		{ 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 3, 7, 4, 3, 4,
-				0, 4, 7, 6, 4, 6, 5, 3, 0, 1, 3, 1, 2 };
+    public Cube(float size) {
+        SIZE = size/2;
+        vertices = new float[]
+                {
+                        // Vertices according to faces
+                        -SIZE, -SIZE, SIZE, //v0
+                        SIZE, -SIZE, SIZE,     //v1
+                        -SIZE, SIZE, SIZE,     //v2
+                        SIZE, SIZE, SIZE,     //v3
 
-		ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
-		vbb.order(ByteOrder.nativeOrder());
-		mVertexBuffer = vbb.asIntBuffer();
-		mVertexBuffer.put(vertices);
-		mVertexBuffer.position(0);
+                        SIZE, -SIZE, SIZE,     //...
+                        SIZE, -SIZE, -SIZE,
+                        SIZE, SIZE, SIZE,
+                        SIZE, SIZE, -SIZE,
 
-		ByteBuffer cbb = ByteBuffer.allocateDirect(colors.length * 4);
-		cbb.order(ByteOrder.nativeOrder());
-		mColorBuffer = cbb.asIntBuffer();
-		mColorBuffer.put(colors);
-		mColorBuffer.position(0);
+                        SIZE, -SIZE, -SIZE,
+                        -SIZE, -SIZE, -SIZE,
+                        SIZE, SIZE, -SIZE,
+                        -SIZE, SIZE, -SIZE,
 
-		mIndexBuffer = ByteBuffer.allocateDirect(indices.length);
-		mIndexBuffer.put(indices);
-		mIndexBuffer.position(0);
-	}
+                        -SIZE, -SIZE, -SIZE,
+                        -SIZE, -SIZE, SIZE,
+                        -SIZE, SIZE, -SIZE,
+                        -SIZE, SIZE, SIZE,
 
-	public void draw(GL10 gl)
-	{
-		gl.glFrontFace(gl.GL_CW);
-		gl.glVertexPointer(3, gl.GL_FIXED, 0, mVertexBuffer);
-		gl.glColorPointer(4, gl.GL_FIXED, 0, mColorBuffer);
-		gl.glDrawElements(gl.GL_TRIANGLES, 36, gl.GL_UNSIGNED_BYTE,
-				mIndexBuffer);
-	}
+                        -SIZE, -SIZE, -SIZE,
+                        SIZE, -SIZE, -SIZE,
+                        -SIZE, -SIZE, SIZE,
+                        SIZE, -SIZE, SIZE,
+
+                        -SIZE, SIZE, SIZE,
+                        SIZE, SIZE, SIZE,
+                        -SIZE, SIZE, -SIZE,
+                        SIZE, SIZE, -SIZE
+                };
+
+
+        texture = new float[]
+                {
+                        //Mapping coordinates for the vertices
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f,
+
+                        0.0f, 0.0f,
+                        0.0f, 1.0f,
+                        1.0f, 0.0f,
+                        1.0f, 1.0f
+                };
+
+        indices = new byte[]
+                {
+                        // Faces definition
+                        0, 1, 3, 0, 3, 2,         // Face front
+                        4, 5, 7, 4, 7, 6,         // Face right
+                        8, 9, 11, 8, 11, 10,     // ...
+                        12, 13, 15, 12, 15, 14,
+                        16, 17, 19, 16, 19, 18,
+                        20, 21, 23, 20, 23, 22
+                };
+
+
+        //
+        ByteBuffer byteBuf = ByteBuffer.allocateDirect(vertices.length * 4);
+        byteBuf.order(ByteOrder.nativeOrder());
+        vertexBuffer = byteBuf.asFloatBuffer();
+        vertexBuffer.put(vertices);
+        vertexBuffer.position(0);
+
+        //
+        byteBuf = ByteBuffer.allocateDirect(texture.length * 4);
+        byteBuf.order(ByteOrder.nativeOrder());
+        textureBuffer = byteBuf.asFloatBuffer();
+        textureBuffer.put(texture);
+        textureBuffer.position(0);
+
+
+        //
+        indexBuffer = ByteBuffer.allocateDirect(indices.length);
+        indexBuffer.put(indices);
+        indexBuffer.position(0);
+
+    }
+
+    public void draw(GL10 gl) {
+
+        //Enable the vertex, texture and normal state
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+
+        //Point to our buffers
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
+
+        //Draw the vertices as triangles, based on the Index Buffer information
+        gl.glDrawElements(GL10.GL_TRIANGLES, indices.length, GL10.GL_UNSIGNED_BYTE, indexBuffer);
+
+        //Disable the client state before leaving
+        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+
+    }
 
 }

@@ -27,14 +27,14 @@ public class Plain {
     byte[] indices;
 
     public Plain(float size) {
-        SIZE = size;
+        SIZE = size/2;
         vertices = new float[]
                 {
                         // Vertices according to faces
-                        -SIZE, -SIZE, SIZE, //v0
-                        SIZE, -SIZE, SIZE,     //v1
-                        -SIZE, SIZE, SIZE,     //v2
-                        SIZE, SIZE, SIZE     //v3
+                        -SIZE, -SIZE, 0.0f, //v0
+                        SIZE, -SIZE, 0.0f,     //v1
+                        -SIZE, SIZE, 0.0f,     //v2
+                        SIZE, SIZE, 0.0f     //v3
 
                 };
 
@@ -43,8 +43,8 @@ public class Plain {
                 {
                         //Mapping coordinates for the vertices
                         0.0f, 0.0f,
-                        0.0f, 1.0f,
                         1.0f, 0.0f,
+                        0.0f, 1.0f,
                         1.0f, 1.0f
                 };
 
