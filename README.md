@@ -10,7 +10,7 @@ For reminding myself.
 * Download android SDK and other tools via SDK manager. Set `ANDROID_HOME` and add it to `PATH`.
 
 ## Gradle
-* Android studio comes with Gradle in `android_studio/bin/gradle/gradle-x.y`. Setup `GRADLE_HOME`, add `$GRADLE_HOME\bin` to `PATH`.
+* Android studio comes with Gradle in `android_studio/bin/gradle/gradle-x.y`. Setup `GRADLE_HOME`, add `$GRADLE_HOME/bin` to `PATH`.
 * I prefer local __Gradle__ to __Gradle Wrapper__, and choose the local one in preferences menu.
 * I prefer local mavenRepository to jcenter, and use `mavenLocal()` in buildscript.
 * Dependency:
@@ -25,14 +25,17 @@ buildscript {
 }
 ```
 
+## Moverio API
+* Moverio API is 
+
 ## ARToolKit
 [__ARToolKit__](http://artoolkit.org/) is cool!
 
-* Copy ARBaseLib code in the workspace, and in `aRBaseLib\build.gradle` apply android library plugin:
+* Copy ARBaseLib code in the workspace, and in `aRBaseLib/build.gradle` apply android library plugin:
 ```
 apply plugin: 'com.android.library'
 ```
-* Make sure you compile the library prior to the app, add the following to `app\build.gradle`:
+* Make sure you compile the library prior to the app, add the following to `app/build.gradle`:
 ```
 dependencies {
     compile project(':aRBaseLib')
@@ -72,7 +75,7 @@ subprojects {
 defaultTasks 'assembleRelease', 'uploadArchives'
 
 ```
-* Dependencies for a specific application in `app\build.gradle`:
+* Dependencies for a specific application in `app/build.gradle`:
 ```
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

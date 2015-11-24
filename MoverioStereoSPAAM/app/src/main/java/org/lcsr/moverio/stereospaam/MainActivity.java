@@ -115,6 +115,11 @@ public class MainActivity extends ARActivity {
 		dismissButton1.setOnClickListener(dismissButtonClickListener);
 		Button dismissButton2 = (Button) popupWindowView.findViewById(R.id.dismissButton2);
 		dismissButton2.setOnClickListener(dismissButtonClickListener);
+
+		Button cancelButton1 = (Button) popupWindowView.findViewById(R.id.cancelButton1);
+		cancelButton1.setOnClickListener(cancelButtonClickListener);
+		Button cancelButton2 = (Button) popupWindowView.findViewById(R.id.cancelButton2);
+		cancelButton2.setOnClickListener(cancelButtonClickListener);
     }
 
 	private View.OnClickListener readButtonClickListener = new View.OnClickListener(){
@@ -143,6 +148,14 @@ public class MainActivity extends ARActivity {
 		}
 	};
 
+	private View.OnClickListener cancelButtonClickListener = new View.OnClickListener(){
+		@Override
+		public void onClick(View v){
+			spaam.cancelLast();
+			popupWindow.dismiss();
+			Log.i(TAG, "Cancel button pressed");
+		}
+	};
 
     
     @Override

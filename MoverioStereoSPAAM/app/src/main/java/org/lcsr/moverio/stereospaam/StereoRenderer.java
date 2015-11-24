@@ -123,7 +123,7 @@ public class StereoRenderer extends ARRenderer {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         if (glTrans == null || spaam.getStatus() == SPAAM.SPAAMStatus.CALIB_RAW) {
             semaphore = true;
-            gl.glClearColor(0.2f, 0.0f, 0.0f, 0.5f);
+            gl.glClearColor(0.3f, 0.3f, 0.0f, 0.5f);
             return;
         }
 

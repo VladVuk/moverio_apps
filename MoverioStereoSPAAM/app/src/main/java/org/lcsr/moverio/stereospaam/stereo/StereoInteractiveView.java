@@ -157,8 +157,10 @@ public class StereoInteractiveView extends View {
 		if ( p1 == null || p2 == null )
 			return;
 		paint.setColor(color);
-		canvas.drawCircle((float) p1.x, (float) p1.y, 5.0f, paint);
-		canvas.drawCircle((float) p2.x + width, (float) p2.y, 5.0f, paint);
+		if ( inView(p1.x, p1.y) )
+			canvas.drawCircle((float) p1.x, (float) p1.y, 5.0f, paint);
+		if ( inView(p2.x, p2.y) )
+			canvas.drawCircle((float) p2.x + width, (float) p2.y, 5.0f, paint);
 	}
 
 	private void drawStereoCrosshair(Paint paint, Canvas canvas, Point p1, Point p2) {
@@ -167,10 +169,20 @@ public class StereoInteractiveView extends View {
 		paint.setColor(Color.GREEN);
 		int length = 40;
 		int thickness = 4;
-		canvas.drawRect(p1.x - thickness / 2, p1.y - length / 2, p1.x + thickness / 2, p1.y + length / 2, paint);
-		canvas.drawRect(p1.x - length / 2, p1.y - thickness / 2, p1.x + length / 2, p1.y + thickness / 2, paint);
-		canvas.drawRect(p2.x - thickness / 2 + width, p2.y - length / 2, p2.x + thickness / 2 + width, p2.y + length / 2, paint);
-		canvas.drawRect(p2.x - length / 2 + width, p2.y - thickness / 2, p2.x + length / 2 + width, p2.y + thickness / 2, paint);
+
+		if (inView(p1.x - thickness / 2, p1.y - length / 2) && inView(p1.x + thickness / 2, p1.y + length / 2)) {
+			if (inView(p1.x - length / 2, p1.y - thickness / 2) && inView(p1.x + length / 2, p1.y + thickness / 2)) {
+				canvas.drawRect(p1.x - thickness / 2, p1.y - length / 2, p1.x + thickness / 2, p1.y + length / 2, paint);
+				canvas.drawRect(p1.x - length / 2, p1.y - thickness / 2, p1.x + length / 2, p1.y + thickness / 2, paint);
+			}
+		}
+
+		if (inView(p2.x - thickness / 2, p2.y - length / 2) && inView(p2.x + thickness / 2, p2.y + length / 2)) {
+			if (inView(p2.x - length / 2, p2.y - thickness / 2) && inView(p2.x + length / 2, p2.y + thickness / 2)) {
+				canvas.drawRect(p2.x - thickness / 2 + width, p2.y - length / 2, p2.x + thickness / 2 + width, p2.y + length / 2, paint);
+				canvas.drawRect(p2.x - length / 2 + width, p2.y - thickness / 2, p2.x + length / 2 + width, p2.y + thickness / 2, paint);
+			}
+		}
 	}
 
 	private void drawStereoTrapezoid(Paint paint, Canvas canvas, Point p1, Point p2){
@@ -182,19 +194,27 @@ public class StereoInteractiveView extends View {
 		int upx = 90;
 		int downx = 120;
 		int downy = 60;
-		wallpath.moveTo(p1.x - upx, p1.y - upy);
-		wallpath.lineTo(p1.x + upx, p1.y - upy);
-		wallpath.lineTo(p1.x + downx, p1.y + downy);
-		wallpath.lineTo(p1.x - downx, p1.y + downy);
-		wallpath.lineTo(p1.x - upx, p1.y - upy);
-		canvas.drawPath(wallpath, paint);
+
+		if ( inView(p1.x - upx, p1.y - upy) && inView(p1.x + upx, p1.y - upy) &&
+				inView(p1.x + downx, p1.y + downy) && inView(p1.x - downx, p1.y + downy)) {
+			wallpath.moveTo(p1.x - upx, p1.y - upy);
+			wallpath.lineTo(p1.x + upx, p1.y - upy);
+			wallpath.lineTo(p1.x + downx, p1.y + downy);
+			wallpath.lineTo(p1.x - downx, p1.y + downy);
+			wallpath.lineTo(p1.x - upx, p1.y - upy);
+			canvas.drawPath(wallpath, paint);
+		}
 		wallpath.reset();
-		wallpath.moveTo(p2.x - upx + width, p2.y - upy);
-		wallpath.lineTo(p2.x + upx + width, p2.y - upy);
-		wallpath.lineTo(p2.x + downx + width, p2.y + downy);
-		wallpath.lineTo(p2.x - downx + width, p2.y + downy);
-		wallpath.lineTo(p2.x - upx + width, p2.y - upy);
-		canvas.drawPath(wallpath, paint);
+
+		if ( inView(p2.x - upx, p2.y - upy) && inView(p2.x + upx, p2.y - upy) &&
+				inView(p2.x + downx, p2.y + downy) && inView(p2.x - downx, p2.y + downy)) {
+			wallpath.moveTo(p2.x - upx + width, p2.y - upy);
+			wallpath.lineTo(p2.x + upx + width, p2.y - upy);
+			wallpath.lineTo(p2.x + downx + width, p2.y + downy);
+			wallpath.lineTo(p2.x - downx + width, p2.y + downy);
+			wallpath.lineTo(p2.x - upx + width, p2.y - upy);
+			canvas.drawPath(wallpath, paint);
+		}
 	}
 
 	public void updateTransformation(Matrix t) {
@@ -202,6 +222,12 @@ public class StereoInteractiveView extends View {
 	}
 
 
-	
+	public boolean inView(float x, float y){
+		if ( x * (x-width) > 0 )
+			return false;
+		if ( y * (y-height) > 0 )
+			return false;
+		return true;
+	}
 
 }

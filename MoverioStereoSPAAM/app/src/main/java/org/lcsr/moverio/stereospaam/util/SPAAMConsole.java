@@ -135,9 +135,10 @@ public class SPAAMConsole {
         Random r = new Random();
         int offsetMin = 300;
         int offsetMax = 400;
+        int trapezoidPadding = 100;
         int length = 40;
-        int x1 = offsetMax/2 + length/2;
-        int x2 = 960 - offsetMax/2 - length/2;
+        int x1 = offsetMax/2 + length/2 + trapezoidPadding;
+        int x2 = 960 - offsetMax/2 - length/2 - trapezoidPadding;
         int y1 = length/2;
         int y2 = 492 - length/2;
         for (int i = 0; i < alignMax; i++) {
