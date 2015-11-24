@@ -355,6 +355,7 @@ public class SPAAM {
 				of.write(sss.getBytes());
 			}
 			of.close();
+			Log.i(TAG, "Write file done");
 			return true;
 		}
 		catch (Exception e) {

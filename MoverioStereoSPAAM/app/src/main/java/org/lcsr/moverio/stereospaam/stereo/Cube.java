@@ -4,6 +4,12 @@ package org.lcsr.moverio.stereospaam.stereo;
  * Created by qian on 11/20/15.
  */
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLUtils;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -22,41 +28,44 @@ public class Cube {
     float[] vertices, texture;
     private ByteBuffer	indexBuffer;
     byte[] indices;
+    private int textureID;
+    private Bitmap bmp;
 
-    public Cube(float size) {
+    public Cube(float size, float x, float y, float z) {
+        textureID = 0;
         SIZE = size/2;
         vertices = new float[]
                 {
                         // Vertices according to faces
-                        -SIZE, -SIZE, SIZE, //v0
-                        SIZE, -SIZE, SIZE,     //v1
-                        -SIZE, SIZE, SIZE,     //v2
-                        SIZE, SIZE, SIZE,     //v3
+                        x - SIZE, y - SIZE, z - SIZE, //v0
+                        x + SIZE, y - SIZE, z + SIZE,     //v1
+                        x - SIZE, y + SIZE, z + SIZE,     //v2
+                        x + SIZE, y + SIZE, z + SIZE,     //v3
 
-                        SIZE, -SIZE, SIZE,     //...
-                        SIZE, -SIZE, -SIZE,
-                        SIZE, SIZE, SIZE,
-                        SIZE, SIZE, -SIZE,
+                        x + SIZE, y - SIZE, z + SIZE,     //...
+                        x + SIZE, y - SIZE, z - SIZE,
+                        x + SIZE, y + SIZE, z + SIZE,
+                        x + SIZE, y + SIZE, z - SIZE,
 
-                        SIZE, -SIZE, -SIZE,
-                        -SIZE, -SIZE, -SIZE,
-                        SIZE, SIZE, -SIZE,
-                        -SIZE, SIZE, -SIZE,
+                        x + SIZE, y - SIZE, z - SIZE,
+                        x - SIZE, y - SIZE, z - SIZE,
+                        x + SIZE, y + SIZE, z - SIZE,
+                        x - SIZE, y + SIZE, z - SIZE,
 
-                        -SIZE, -SIZE, -SIZE,
-                        -SIZE, -SIZE, SIZE,
-                        -SIZE, SIZE, -SIZE,
-                        -SIZE, SIZE, SIZE,
+                        x - SIZE, y - SIZE, z - SIZE,
+                        x - SIZE, y - SIZE, z + SIZE,
+                        x - SIZE, y + SIZE, z - SIZE,
+                        x - SIZE, y + SIZE, z + SIZE,
 
-                        -SIZE, -SIZE, -SIZE,
-                        SIZE, -SIZE, -SIZE,
-                        -SIZE, -SIZE, SIZE,
-                        SIZE, -SIZE, SIZE,
+                        x - SIZE, y - SIZE, z - SIZE,
+                        x + SIZE, y - SIZE, z - SIZE,
+                        x - SIZE, y - SIZE, z + SIZE,
+                        x + SIZE, y - SIZE, z + SIZE,
 
-                        -SIZE, SIZE, SIZE,
-                        SIZE, SIZE, SIZE,
-                        -SIZE, SIZE, -SIZE,
-                        SIZE, SIZE, -SIZE
+                        x - SIZE, y + SIZE, z + SIZE,
+                        x + SIZE, y + SIZE, z + SIZE,
+                        x - SIZE, y + SIZE, z - SIZE,
+                        x + SIZE, y + SIZE, z - SIZE
                 };
 
 
@@ -128,7 +137,25 @@ public class Cube {
 
     }
 
+    public boolean loadTexture(GL10 gl, Resources res, int resID){
+        int[] temp_tex = new int[1];
+        gl.glGenTextures(1, temp_tex, 0);
+        textureID = temp_tex[0];
+        bmp = BitmapFactory.decodeResource(res, resID);
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bmp, 0);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+        return true;
+    }
+
     public void draw(GL10 gl) {
+        gl.glEnable(GL10.GL_TEXTURE_2D);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureID);
 
         //Enable the vertex, texture and normal state
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
@@ -144,6 +171,9 @@ public class Cube {
         //Disable the client state before leaving
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+        gl.glDisable(GL10.GL_TEXTURE_2D);
 
     }
 

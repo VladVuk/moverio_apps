@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#373737"
+    android:id="@+id/popup_view">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Read File"
+            android:id="@+id/readButton1"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Write File"
+            android:id="@+id/writeButton1"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Dismiss"
+            android:id="@+id/dismissButton1"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Read File"
+            android:id="@+id/readButton2"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Write File"
+            android:id="@+id/writeButton2"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Dismiss"
+            android:id="@+id/dismissButton2"
+            android:layout_weight="1"
+            android:layout_margin="20dp"
+            android:textSize="40dp"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+</LinearLayout>

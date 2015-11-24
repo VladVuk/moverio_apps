@@ -1,5 +1,8 @@
 <resources>
 
     <string name="app_name">MoverioStereoSPAAM</string>
+    <string name="action1">Action1</string>
+    <string name="action2">Action2</string>
+    <string name="action3">Action3</string>
     
 </resources>

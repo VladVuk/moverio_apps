@@ -18,6 +18,7 @@ public class SPAAMConsole {
     private SPAAMStatus status;
     private SPAAM left, right;
     private List<Point> pointsLeft, pointsRight;
+    private boolean updated;
 
     private int alignCount;
     private int alignMax;
@@ -26,6 +27,7 @@ public class SPAAMConsole {
     public SPAAMConsole(){
         alignCount = 0;
         alignMax = 10;
+        updated = false;
         status = SPAAMStatus.CALIB_RAW;
         double[] singlePointArray = {0.0, 0.0, 0.0, 1.0};
         singlePoint = new Matrix( singlePointArray, 4);
@@ -39,6 +41,20 @@ public class SPAAMConsole {
         initScreenPoints();
         Log.i(TAG, "constructed");
     }
+
+    public void readFile(){
+        left.readFile();
+        right.readFile();
+        synchronizeAlignCount();
+        synchronizeStatus();
+        updated = true;
+    }
+
+    public void writeFile(){
+        left.writeFile();
+        right.writeFile();
+    }
+
 
     public Point calculateScreenPointLeft(Matrix T, Matrix spacePoint){
         if (spacePoint == null)
@@ -75,10 +91,13 @@ public class SPAAMConsole {
     }
 
     public void clicked(Matrix T){
+        if (status == SPAAMStatus.DONE_RAW)
+            return;
         left.newAlignment(pointsLeft.get(alignCount), T);
         right.newAlignment(pointsRight.get(alignCount), T);
         synchronizeAlignCount();
         synchronizeStatus();
+        updated = true;
     }
 
     public void synchronizeAlignCount(){
@@ -96,6 +115,7 @@ public class SPAAMConsole {
         right.cancelLast();
         synchronizeAlignCount();
         synchronizeStatus();
+        updated = true;
     }
 
     public void synchronizeStatus(){
@@ -113,15 +133,17 @@ public class SPAAMConsole {
         pointsLeft = new ArrayList<Point>();
         pointsRight = new ArrayList<Point>();
         Random r = new Random();
-        int offset = 300;
+        int offsetMin = 300;
+        int offsetMax = 400;
         int length = 40;
-        int x1 = offset/2 + length/2;
-        int x2 = 960 - offset/2 - length/2;
+        int x1 = offsetMax/2 + length/2;
+        int x2 = 960 - offsetMax/2 - length/2;
         int y1 = length/2;
         int y2 = 492 - length/2;
         for (int i = 0; i < alignMax; i++) {
             int x = r.nextInt(x2-x1) + x1;
             int y = r.nextInt(y2-y1) + y1;
+            int offset = r.nextInt(offsetMax-offsetMin) + offsetMin;
             pointsLeft.add(new Point(x+offset/2, y));
             pointsRight.add(new Point(x-offset/2, y));
         }
@@ -152,5 +174,13 @@ public class SPAAMConsole {
 
     public int getAlignMax(){
         return alignMax;
+    }
+
+    public boolean getUpdated(){
+        return updated;
+    }
+
+    public void setUpdated(boolean u){
+        updated = u;
     }
 }

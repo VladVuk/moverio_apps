@@ -35,6 +35,7 @@ public class StereoInteractiveView extends View {
 	private SPAAMConsole spaam;
 	private Matrix T;
 	private Point p1, p2;
+	private int TEXTSIZE = 20;
 
 	public StereoInteractiveView(Context context) {
 		super(context);
@@ -56,6 +57,7 @@ public class StereoInteractiveView extends View {
 		Paint paint = new Paint();
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(Color.TRANSPARENT);
+		paint.setTextSize(TEXTSIZE);
 		canvas.drawPaint(paint);
 
 		drawStereoViewBorder(paint, canvas);
@@ -68,6 +70,7 @@ public class StereoInteractiveView extends View {
 			case CALIB_RAW:
 				p1 = spaam.getNextScreenPointLeft();
 				p2 = spaam.getNextScreenPointRight();
+				drawStereoTrapezoid(paint, canvas, p1, p2);
 				drawStereoCrosshair(paint, canvas, p1, p2);
 				p1 = spaam.getLastCursorPointLeft();
 				p2 = spaam.getLastCursorPointRight();
@@ -121,7 +124,6 @@ public class StereoInteractiveView extends View {
 	private void drawStereoText(Paint paint, Canvas canvas, String text) {
 		// Make sure that the canvas is scaled before entering this function
 		paint.setColor(Color.WHITE);
-		paint.setTextSize(20);
 		int border = 20;
 		canvas.drawText(text, border/2, border, paint);
 		canvas.drawText(text, width + border/2, border, paint);
@@ -147,7 +149,6 @@ public class StereoInteractiveView extends View {
 		canvas.drawRect(width-rectBorder/2-rectWidth, rectBorder, width-rectBorder/2, rectHeight+rectBorder, paint);
 		canvas.drawRect(width*2-rectBorder/2-rectWidth, rectBorder, width*2-rectBorder/2, rectHeight+rectBorder, paint);
 		paint.setColor(Color.BLACK);
-		paint.setTextSize(20);
 		canvas.drawText(text, textPositionX, textPositionY, paint);
 		canvas.drawText(text, width + textPositionX, textPositionY, paint);
 	}
@@ -170,6 +171,30 @@ public class StereoInteractiveView extends View {
 		canvas.drawRect(p1.x - length / 2, p1.y - thickness / 2, p1.x + length / 2, p1.y + thickness / 2, paint);
 		canvas.drawRect(p2.x - thickness / 2 + width, p2.y - length / 2, p2.x + thickness / 2 + width, p2.y + length / 2, paint);
 		canvas.drawRect(p2.x - length / 2 + width, p2.y - thickness / 2, p2.x + length / 2 + width, p2.y + thickness / 2, paint);
+	}
+
+	private void drawStereoTrapezoid(Paint paint, Canvas canvas, Point p1, Point p2){
+		if ( p1 == null || p2 == null )
+			return;
+		paint.setColor(Color.GRAY);
+		Path wallpath = new Path();
+		int upy = 60;
+		int upx = 90;
+		int downx = 120;
+		int downy = 60;
+		wallpath.moveTo(p1.x - upx, p1.y - upy);
+		wallpath.lineTo(p1.x + upx, p1.y - upy);
+		wallpath.lineTo(p1.x + downx, p1.y + downy);
+		wallpath.lineTo(p1.x - downx, p1.y + downy);
+		wallpath.lineTo(p1.x - upx, p1.y - upy);
+		canvas.drawPath(wallpath, paint);
+		wallpath.reset();
+		wallpath.moveTo(p2.x - upx + width, p2.y - upy);
+		wallpath.lineTo(p2.x + upx + width, p2.y - upy);
+		wallpath.lineTo(p2.x + downx + width, p2.y + downy);
+		wallpath.lineTo(p2.x - downx + width, p2.y + downy);
+		wallpath.lineTo(p2.x - upx + width, p2.y - upy);
+		canvas.drawPath(wallpath, paint);
 	}
 
 	public void updateTransformation(Matrix t) {

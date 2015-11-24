@@ -18,6 +18,8 @@ public class FrameBuffer {
     private int textureID = 0;
     private int frameBufferID = 0;
     private Plain holder;
+    private float zNear;
+    private float zFar;
 
     // The surface dimension is 1024 * 512
     // In OpenGL, the framebuffer dimension must be POT (power of 2)
@@ -58,17 +60,24 @@ public class FrameBuffer {
         Log.i(TAG, "constructed");
     }
 
-    public void renderToTexturePrepare(GL10 gl) {
+    public void setClippingPlane(float n, float f){
+        zNear = n;
+        zFar = f;
+    }
+
+    public void renderToTexturePrepare(GL10 gl, float[] glProj) {
         GL11ExtensionPack gl11 = (GL11ExtensionPack)gl;
         gl11.glBindFramebufferOES(GL11ExtensionPack.GL_FRAMEBUFFER_OES, textureID);
         gl.glViewport(glViewportX, glViewportY, surfaceWidth, surfaceHeight);
-        gl11.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+//        gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
         gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         gl.glMatrixMode(GL10.GL_PROJECTION);
         gl.glLoadIdentity();
-        gl.glOrthof(-surfaceWidth / 2, surfaceWidth / 2, -surfaceHeight / 2, surfaceHeight / 2, -1000f, 1000f);
-        GLU.gluLookAt(gl, eyef[0], eyef[1], eyef[2], centerf[0], centerf[1], centerf[2], upf[0], upf[1], upf[2]);
+//        gl.glOrthof(-surfaceWidth / 2, surfaceWidth / 2, -surfaceHeight / 2, surfaceHeight / 2, zNear, zFar);
+        gl.glOrthof(0.0f, surfaceWidth, surfaceHeight, 0.0f, zNear, zFar);
+        gl.glMultMatrixf(glProj, 0);
+//        GLU.gluLookAt(gl, eyef[0], eyef[1], eyef[2], centerf[0], centerf[1], centerf[2], upf[0], upf[1], upf[2]);
     }
 
     public void textureToScreen(GL10 gl) {
