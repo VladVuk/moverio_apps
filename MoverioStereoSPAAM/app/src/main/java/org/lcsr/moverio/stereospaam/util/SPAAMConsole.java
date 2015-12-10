@@ -24,9 +24,10 @@ public class SPAAMConsole {
     private int alignMax;
     private Matrix singlePoint;
 
+
     public SPAAMConsole(){
         alignCount = 0;
-        alignMax = 10;
+        alignMax = 20;
         updated = false;
         status = SPAAMStatus.CALIB_RAW;
         double[] singlePointArray = {0.0, 0.0, 0.0, 1.0};
@@ -133,8 +134,8 @@ public class SPAAMConsole {
         pointsLeft = new ArrayList<Point>();
         pointsRight = new ArrayList<Point>();
         Random r = new Random();
-        int offsetMin = 300;
-        int offsetMax = 400;
+        int offsetMin = 100;
+        int offsetMax = 160;
         int trapezoidPadding = 100;
         int length = 40;
         int x1 = offsetMax/2 + length/2 + trapezoidPadding;
@@ -144,7 +145,7 @@ public class SPAAMConsole {
         for (int i = 0; i < alignMax; i++) {
             int x = r.nextInt(x2-x1) + x1;
             int y = r.nextInt(y2-y1) + y1;
-            int offset = r.nextInt(offsetMax-offsetMin) + offsetMin;
+            int offset = offsetMin + (i/2) * 6;
             pointsLeft.add(new Point(x+offset/2, y));
             pointsRight.add(new Point(x-offset/2, y));
         }

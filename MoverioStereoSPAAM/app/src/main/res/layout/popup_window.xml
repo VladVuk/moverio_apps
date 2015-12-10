@@ -15,12 +15,23 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:text="Hide/Show Information"
+            android:id="@+id/hideButton1"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:text="Cancel Last"
             android:id="@+id/cancelButton1"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -29,8 +40,8 @@
             android:text="Read File"
             android:id="@+id/readButton1"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -39,8 +50,8 @@
             android:text="Write File"
             android:id="@+id/writeButton1"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -49,8 +60,8 @@
             android:text="Dismiss"
             android:id="@+id/dismissButton1"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
     </LinearLayout>
@@ -64,12 +75,23 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:text="Hide/Show Information"
+            android:id="@+id/hideButton2"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:text="Cancel Last"
             android:id="@+id/cancelButton2"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -78,8 +100,8 @@
             android:text="Read File"
             android:id="@+id/readButton2"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -88,8 +110,8 @@
             android:text="Write File"
             android:id="@+id/writeButton2"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
         <Button
@@ -98,8 +120,8 @@
             android:text="Dismiss"
             android:id="@+id/dismissButton2"
             android:layout_weight="1"
-            android:layout_margin="20dp"
-            android:textSize="40dp"
+            android:layout_margin="10dp"
+            android:textSize="30dp"
             android:textColor="@android:color/white" />
 
     </LinearLayout>

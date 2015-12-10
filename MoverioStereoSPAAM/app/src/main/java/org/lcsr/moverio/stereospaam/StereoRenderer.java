@@ -22,8 +22,9 @@ import Jama.Matrix;
  */
 public class StereoRenderer extends ARRenderer {
     private static String TAG = "StereoRenderer";
-    private Matrix T;
-    private float[] glTrans;
+    private float[] glTransRead, glTrans;
+    private float[] glTransDefault = new float[] {0.95015115f, 0.19861476f, -0.24059308f, 0.0f, -0.31156227f, 0.62816185f, -0.7128754f, 0.0f, 0.009452152f, 0.75230217f, 0.65875655f, 0.0f, -163.45354f, 44.031586f, -468.28262f, 1.0f};
+
     private SPAAMConsole spaam;
     private VisualTracker visualTracker;
 
@@ -37,14 +38,16 @@ public class StereoRenderer extends ARRenderer {
     private Matrix Util = null;
     private float[] glProjLeft, glProjRight;
 
-    private boolean semaphore = true;
-
 
 
     public StereoRenderer(Context ct, VisualTracker vt, SPAAMConsole spaamConsle){
         super();
         context = ct;
-        cube = new Cube(40f, 0.0f, 0.0f, 20.0f);
+        // Large TAG
+        // cube = new Cube(160f, 160f, 160f, 0.0f, 0.0f, 80f);
+        // Small TAG
+        cube = new Cube(40f, 40f, 40f, 0.0f, 0.0f, 20f);
+
         spaam = spaamConsle;
         visualTracker = vt;
         Log.i(TAG, "constructed");
@@ -85,49 +88,40 @@ public class StereoRenderer extends ARRenderer {
 
     @Override
     public boolean configureARScene() {
+        // Large TAG
+//        visualTracker.setMarker("single;Data/patt.hiro;320");
+        // Small TAG
         visualTracker.setMarker("single;Data/patt.hiro;80");
         Log.i(TAG, "ARScene configured");
         return true;
     }
 
     public void renderScene(GL10 gl) {
-//        gl.glMatrixMode(GL10.GL_MODELVIEW);
-//        gl.glLoadIdentity();
-//        gl.glTranslatef(480f, 246f, 0f);
-//        cube.draw(gl);
-//        gl.glMatrixMode(GL10.GL_MODELVIEW);
-//        gl.glLoadIdentity();
-//        gl.glTranslatef(-480f, 246f, 0f);
-//        cube.draw(gl);
-//        gl.glMatrixMode(GL10.GL_MODELVIEW);
-//        gl.glLoadIdentity();
-//        gl.glTranslatef(480f, -246f, 0f);
-//        cube.draw(gl);
-//        gl.glMatrixMode(GL10.GL_MODELVIEW);
-//        gl.glLoadIdentity();
-//        gl.glTranslatef(-480f, -246f, 0f);
-//        cube.draw(gl);
         gl.glMatrixMode(GL10.GL_MODELVIEW);
         gl.glLoadIdentity();
         gl.glLoadMatrixf(glTrans, 0);
-//        gl.glTranslatef(param, 0.0f, 0.0f);
-//        gl.glScalef(10.0f, 10.0f, 10.0f);
-//        gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);
+        gl.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
         cube.draw(gl);
     }
 
     @Override
     public void draw(GL10 gl)
     {
-        semaphore = false;
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        if (glTrans == null || spaam.getStatus() == SPAAM.SPAAMStatus.CALIB_RAW) {
-            semaphore = true;
-            gl.glClearColor(0.3f, 0.3f, 0.0f, 0.5f);
-            return;
+
+        if ( glTransRead == null )
+            glTrans = glTransDefault;
+        else
+            glTrans = glTransRead.clone();
+
+        if ( spaam.getStatus() == SPAAM.SPAAMStatus.CALIB_RAW ) {
+            glProjLeft = new float[]{1.16524563f, -0.01455041f, -0.0120612057056f, 1.206e-05f, 0.00278049f, -1.12576543f, 0.0451345118982f, -4.513e-05f, -0.31905683f, -0.2071979f, 0.454765460898f, -0.00045472f, 131.49488093f, 12.96216352f, 102.236653588f, -0.00223643f};
+            glProjRight = new float[]{1.19551985f, -0.01836658f, 0.0582958275769f, -5.829e-05f, 0.01441908f, -1.12986884f, -0.0396739660315f, 3.967e-05f, -0.31620645f, -0.20908707f, 0.437273712325f, -0.00043723f, 55.14054087f, 17.42113775f, 98.5020902606f, 0.00149776f};
+        }
+        else{
+            updateCalibMat();
         }
 
-        updateCalibMat();
         GL11ExtensionPack gl11 = (GL11ExtensionPack)gl;
 
         // Render Left Screen Texture
@@ -155,13 +149,12 @@ public class StereoRenderer extends ARRenderer {
         right.textureToScreen(gl);
 
         gl.glDisable(GL10.GL_TEXTURE_2D);
-        semaphore = true;
     }
 
     public boolean setupFrameBuffer(GL10 gl){
         left = new FrameBuffer(FrameBuffer.FBO_TYPE.LEFT, surfaceWidth, surfaceHeight);
         right = new FrameBuffer(FrameBuffer.FBO_TYPE.RIGHT, surfaceWidth, surfaceHeight);
-        setClippingPlane(0.01f, 1000.0f);
+        setClippingPlane(0.1f, 1000.0f);
         boolean retLeft = left.setupFrameBuffer(gl);
         boolean retRight = right.setupFrameBuffer(gl);
         return retLeft && retRight;
@@ -193,10 +186,7 @@ public class StereoRenderer extends ARRenderer {
 
 
     public void updateTransformation(Matrix t) {
-        if (semaphore) {
-            T = t;
-            glTrans = Matrix2GLArray(T);
-        }
+        glTransRead = Matrix2GLArray(t);
     }
 
     public void updateCalibMat() {
@@ -208,15 +198,7 @@ public class StereoRenderer extends ARRenderer {
                 if (leftMat.get(0, 3) < 0 && leftMat.get(1, 3) < 0)
                     P = P.times(-1.0);
                 P.set(2, 3, P.get(2, 3) + zFar * zNear);
-                Log.i(TAG, "P1: " + P.get(0, 0) + ", " + P.get(0, 1) + ", " + P.get(0, 2) + ", " + P.get(0, 3));
-                Log.i(TAG, "P2: " + P.get(1,0) + ", " + P.get(1,1) + ", " + P.get(1,2) + ", " + P.get(1,3));
-                Log.i(TAG, "P3: " + P.get(2,0) + ", " + P.get(2,1) + ", " + P.get(2,2) + ", " + P.get(2,3));
-                Log.i(TAG, "P4: " + P.get(3,0) + ", " + P.get(3,1) + ", " + P.get(3,2) + ", " + P.get(3,3));
                 glProjLeft = Matrix2GLArray(P);
-//                glProjLeft = new float[] {2.25287802167f, -0.0710149988668f, 0.164145578453f, -0.000164112753899f,
-//                                -0.105387765071f, -2.28596066826f, 0.244253093084f, -0.000244204249253f,
-//                                -0.596516092764f, -0.186700628568f, 0.82624725921f, -0.00082608203272f,
-//                                103.416115863f, 23.5753742276f, 199.972322633f, 0.0000276718324112f};
                 P = Util.times(rightMat);
                 if (rightMat.get(0, 3) < 0 && rightMat.get(1, 3) < 0)
                     P = P.times(-1.0);

@@ -12,7 +12,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import android.graphics.Point;
@@ -277,7 +280,7 @@ public class SPAAM {
 	}
 
 	public boolean readFile() {
-		File file = new File(Environment.getExternalStorageDirectory(), TAG);
+		File file = new File(Environment.getExternalStorageDirectory(), TAG + ".txt");
 		try {
 		    BufferedReader br = new BufferedReader(new FileReader(file));
 		    String line;
@@ -333,7 +336,9 @@ public class SPAAM {
 	}
 
 	public boolean writeFile() {
-		File file = new File(Environment.getExternalStorageDirectory(), TAG);
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+		String date = df.format(Calendar.getInstance().getTime());
+		File file = new File(Environment.getExternalStorageDirectory(), TAG + "-" + date + ".txt");
 		if ( status == SPAAMStatus.CALIB_RAW ) {
 			Log.i(TAG, "Not supported for CALIB_RAW status");
 			return false;

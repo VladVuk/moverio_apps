@@ -9,6 +9,10 @@
 package org.lcsr.moverio.spaam;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.artoolkit.ar.base.*;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.igtlink.IGTLServer;
@@ -148,8 +152,13 @@ public class MainActivity extends ARActivity {
 				if ( spaam.status == SPAAMStatus.CALIB_RAW )
 					buildAlertMessageNoCube("SPAAM not done");
 				else {
-					File sdcard = Environment.getExternalStorageDirectory();
-					File file = new File(sdcard, filename);
+					// Write file for analysis
+					DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+					String date = df.format(Calendar.getInstance().getTime());
+					File file = new File(Environment.getExternalStorageDirectory(), "G-" + date + ".txt");
+					// Normal write file
+					// File file = new File(Environment.getExternalStorageDirectory(), filename);
+
 					if ( !spaam.writeFile(file))
 						buildAlertMessageNoCube("Write file falied");
 					else

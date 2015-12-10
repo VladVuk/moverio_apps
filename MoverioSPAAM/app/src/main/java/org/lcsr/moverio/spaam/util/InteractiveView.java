@@ -67,7 +67,11 @@ public class InteractiveView extends View {
 		squareSpacePoints.add(new Matrix( td1, 4));
 		squareSpacePoints.add(new Matrix( td2, 4));
 		squareSpacePoints.add(new Matrix( td3, 4));
-		squareSpacePoints.add(new Matrix( td4, 4));		
+		squareSpacePoints.add(new Matrix( td4, 4));
+		squareScreenPoints.add(new Point(0,0));
+		squareScreenPoints.add(new Point(0,0));
+		squareScreenPoints.add(new Point(0,0));
+		squareScreenPoints.add(new Point(0,0));
 	}
 	
 	public void setGeometry(int w, int h) {
@@ -163,6 +167,8 @@ public class InteractiveView extends View {
 			return;
 
 		byte[] ba = {(byte)(baseColor >> 24), (byte)(baseColor >> 16), (byte)(baseColor >> 8), (byte)baseColor };
+		if ( centerPoints.size() == 0 )
+			return;
 		int[] colors = new int[centerPoints.size()];
 		colors[centerPoints.size() - 1] = baseColor;
 		for (int i = centerPoints.size()-2; i >= 0; i--) {

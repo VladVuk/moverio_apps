@@ -117,6 +117,7 @@ public class MainRenderer extends ARRenderer {
     public void draw(GL10 gl) {
     	gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
+
         float[] trans = visualTracker.getMarkerTransformationGL();
     	if ( trans != null && glProj != null ) {
 //            Log.i(TAG, "glProj1: " + glProj[0] + ", " + glProj[1] + ", " + glProj[2] + ", " + glProj[3]);

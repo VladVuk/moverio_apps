@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -22,8 +21,6 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class Cube {
 
-    private float SIZE = 1.0f;
-
     private FloatBuffer	vertexBuffer, textureBuffer;
     float[] vertices, texture;
     private ByteBuffer	indexBuffer;
@@ -31,41 +28,40 @@ public class Cube {
     private int textureID;
     private Bitmap bmp;
 
-    public Cube(float size, float x, float y, float z) {
+    public Cube(float xlen, float ylen, float zlen, float x, float y, float z) {
         textureID = 0;
-        SIZE = size/2;
         vertices = new float[]
                 {
                         // Vertices according to faces
-                        x - SIZE, y - SIZE, z - SIZE, //v0
-                        x + SIZE, y - SIZE, z + SIZE,     //v1
-                        x - SIZE, y + SIZE, z + SIZE,     //v2
-                        x + SIZE, y + SIZE, z + SIZE,     //v3
+                        x - xlen/2, y - ylen/2, z + zlen/2, //v0
+                        x + xlen/2, y - ylen/2, z + zlen/2,     //v1
+                        x - xlen/2, y + ylen/2, z + zlen/2,     //v2
+                        x + xlen/2, y + ylen/2, z + zlen/2,     //v3
 
-                        x + SIZE, y - SIZE, z + SIZE,     //...
-                        x + SIZE, y - SIZE, z - SIZE,
-                        x + SIZE, y + SIZE, z + SIZE,
-                        x + SIZE, y + SIZE, z - SIZE,
+                        x + xlen/2, y - ylen/2, z + zlen/2,     //...
+                        x + xlen/2, y - ylen/2, z - zlen/2,
+                        x + xlen/2, y + ylen/2, z + zlen/2,
+                        x + xlen/2, y + ylen/2, z - zlen/2,
 
-                        x + SIZE, y - SIZE, z - SIZE,
-                        x - SIZE, y - SIZE, z - SIZE,
-                        x + SIZE, y + SIZE, z - SIZE,
-                        x - SIZE, y + SIZE, z - SIZE,
+                        x + xlen/2, y - ylen/2, z - zlen/2,
+                        x - xlen/2, y - ylen/2, z - zlen/2,
+                        x + xlen/2, y + ylen/2, z - zlen/2,
+                        x - xlen/2, y + ylen/2, z - zlen/2,
 
-                        x - SIZE, y - SIZE, z - SIZE,
-                        x - SIZE, y - SIZE, z + SIZE,
-                        x - SIZE, y + SIZE, z - SIZE,
-                        x - SIZE, y + SIZE, z + SIZE,
+                        x - xlen/2, y - ylen/2, z - zlen/2,
+                        x - xlen/2, y - ylen/2, z + zlen/2,
+                        x - xlen/2, y + ylen/2, z - zlen/2,
+                        x - xlen/2, y + ylen/2, z + zlen/2,
 
-                        x - SIZE, y - SIZE, z - SIZE,
-                        x + SIZE, y - SIZE, z - SIZE,
-                        x - SIZE, y - SIZE, z + SIZE,
-                        x + SIZE, y - SIZE, z + SIZE,
+                        x - xlen/2, y - ylen/2, z - zlen/2,
+                        x + xlen/2, y - ylen/2, z - zlen/2,
+                        x - xlen/2, y - ylen/2, z + zlen/2,
+                        x + xlen/2, y - ylen/2, z + zlen/2,
 
-                        x - SIZE, y + SIZE, z + SIZE,
-                        x + SIZE, y + SIZE, z + SIZE,
-                        x - SIZE, y + SIZE, z - SIZE,
-                        x + SIZE, y + SIZE, z - SIZE
+                        x - xlen/2, y + ylen/2, z + zlen/2,
+                        x + xlen/2, y + ylen/2, z + zlen/2,
+                        x - xlen/2, y + ylen/2, z - zlen/2,
+                        x + xlen/2, y + ylen/2, z - zlen/2
                 };
 
 

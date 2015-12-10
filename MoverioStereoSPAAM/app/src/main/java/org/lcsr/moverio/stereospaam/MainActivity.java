@@ -101,6 +101,11 @@ public class MainActivity extends ARActivity {
 			}
 		});
 
+		Button hideButton1 = (Button) popupWindowView.findViewById(R.id.hideButton1);
+		hideButton1.setOnClickListener(hideButtonClickListener);
+		Button hideButton2 = (Button) popupWindowView.findViewById(R.id.hideButton2);
+		hideButton2.setOnClickListener(hideButtonClickListener);
+
 		Button readButton1 = (Button) popupWindowView.findViewById(R.id.readButton1);
 		readButton1.setOnClickListener(readButtonClickListener);
 		Button readButton2 = (Button) popupWindowView.findViewById(R.id.readButton2);
@@ -157,6 +162,15 @@ public class MainActivity extends ARActivity {
 		}
 	};
 
+	private View.OnClickListener hideButtonClickListener = new View.OnClickListener(){
+		@Override
+		public void onClick(View v){
+			intView.setHide(!intView.getHide());
+			popupWindow.dismiss();
+			Log.i(TAG, "Cancel button pressed");
+		}
+	};
+
     
     @Override
     public void onFrameProcessed() {
@@ -185,7 +199,9 @@ public class MainActivity extends ARActivity {
     	hideCameraPreview();
 		intView = new StereoInteractiveView(this);
 		intView.loadSPAAMConsole(spaam);
+//		intView.setHide(true);
 		mainLayout.addView(intView);
+//		spaam.readFile();
     }
     
     @Override

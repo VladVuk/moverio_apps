@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.View;
 
@@ -36,6 +37,7 @@ public class StereoInteractiveView extends View {
 	private Matrix T;
 	private Point p1, p2;
 	private int TEXTSIZE = 20;
+	private boolean hide = false;
 
 	public StereoInteractiveView(Context context) {
 		super(context);
@@ -46,6 +48,13 @@ public class StereoInteractiveView extends View {
 		spaam = spaamConsole;
 	}
 
+	public void setHide(boolean h){
+		hide = h;
+	}
+
+	public boolean getHide(){
+		return hide;
+	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -60,6 +69,9 @@ public class StereoInteractiveView extends View {
 		paint.setTextSize(TEXTSIZE);
 		canvas.drawPaint(paint);
 
+		if (hide)
+			return;
+
 		drawStereoViewBorder(paint, canvas);
 
 		// canvas scaled
@@ -70,7 +82,8 @@ public class StereoInteractiveView extends View {
 			case CALIB_RAW:
 				p1 = spaam.getNextScreenPointLeft();
 				p2 = spaam.getNextScreenPointRight();
-				drawStereoTrapezoid(paint, canvas, p1, p2);
+//				drawStereoTrapezoid(paint, canvas, p1, p2);
+				drawStereoOval(paint, canvas, p1, p2);
 				drawStereoCrosshair(paint, canvas, p1, p2);
 				p1 = spaam.getLastCursorPointLeft();
 				p2 = spaam.getLastCursorPointRight();
@@ -161,6 +174,16 @@ public class StereoInteractiveView extends View {
 			canvas.drawCircle((float) p1.x, (float) p1.y, 5.0f, paint);
 		if ( inView(p2.x, p2.y) )
 			canvas.drawCircle((float) p2.x + width, (float) p2.y, 5.0f, paint);
+	}
+
+	private void drawStereoOval(Paint paint, Canvas canvas, Point p1, Point p2){
+		paint.setColor(Color.GRAY);
+		int ovalWidth = 200;
+		int ovalHeight = 80;
+		RectF oval1 = new RectF(p1.x - ovalWidth/2, p1.y - ovalHeight/2, p1.x + ovalWidth/2, p1.y+ovalHeight/2);
+		canvas.drawOval(oval1, paint);
+		RectF oval2 = new RectF(p2.x - ovalWidth/2 + width, p2.y - ovalHeight/2, p2.x + ovalWidth/2 + width, p2.y+ovalHeight/2);
+		canvas.drawOval(oval2, paint);
 	}
 
 	private void drawStereoCrosshair(Paint paint, Canvas canvas, Point p1, Point p2) {
