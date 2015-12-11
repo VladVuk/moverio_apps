@@ -23,7 +23,7 @@ import Jama.Matrix;
 public class StereoRenderer extends ARRenderer {
     private static String TAG = "StereoRenderer";
     private float[] glTransRead, glTrans;
-    private float[] glTransDefault = new float[] {0.95015115f, 0.19861476f, -0.24059308f, 0.0f, -0.31156227f, 0.62816185f, -0.7128754f, 0.0f, 0.009452152f, 0.75230217f, 0.65875655f, 0.0f, -163.45354f, 44.031586f, -468.28262f, 1.0f};
+    private float[] glTransDefault = new float[] {0.95015115f, 0.19861476f, -0.24059308f, 0.0f, -0.31156227f, 0.62816185f, -0.7128754f, 0.0f, 0.009452152f, 0.75230217f, 0.65875655f, 0.0f, -123.45354f, 44.031586f, -468.28262f, 1.0f};
 
     private SPAAMConsole spaam;
     private VisualTracker visualTracker;
