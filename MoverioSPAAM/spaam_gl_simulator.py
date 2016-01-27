@@ -25,7 +25,7 @@ np.set_printoptions(suppress=True)
 
 # If InMeter is true, the unit for everything is meter.
 # Otherwise, millimeter.
-InMeter = False
+InMeter = True
 
 # The position of the cube in world coordinates.
 CubeCenter = np.array([[0.0],[0.0],[0.0],[1.0]])
@@ -44,6 +44,9 @@ CubeLength = 20.0
 CalibrationMatrix = np.array([[2.286139238334763, 0.0070415398909735895, -0.604805223461732, 105.14202332183234],
 							[-0.05621397423572271, -2.232857213864352, -0.1760644170151926, 25.838689031762023],
 							[-2.2861000742183536E-4, -1.1084245778509513E-5, -7.927780889265074E-4, 0.014188381718983789]])
+# CalibrationMatrix = np.array([[1.6380400513461664, -5.286675477061316E-4, -0.42126167214557564, 83.65883817583584],\
+# 							[0.020200868919747414, -1.5139893596735088, -0.2747110787710624, 31.84094083501643],\
+# 							[4.4314148028949554E-5, 3.426760716105004E-6, -5.868797627342585E-4, 0.020811645815770607]])
 # CalibrationMatrix = np.array([[   1.16524563,    0.00278049,   -0.31905683,  131.49488093],
 #  [  -0.01455041,   -1.12576543,   -0.2071979,    12.96216352],
 #  [   0.00001206,   -0.00004513,   -0.00045472,   -0.00223643]])
@@ -231,6 +234,7 @@ def keyboard( key, x, y ):
 
 
 ProjectionMatrix = computeProjectionMatrix(CalibrationMatrix)
+printTranspose(ProjectionMatrix)
 printTranspose(TransformationMatrix)
 glut.glutInit()
 glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGBA)

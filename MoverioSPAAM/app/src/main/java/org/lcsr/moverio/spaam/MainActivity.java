@@ -16,7 +16,6 @@ import java.util.Calendar;
 import org.artoolkit.ar.base.*;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.igtlink.IGTLServer;
-import org.lcsr.moverio.spaam.R;
 import org.lcsr.moverio.spaam.util.*;
 import org.lcsr.moverio.spaam.util.SPAAM.SPAAMStatus;
 
@@ -52,10 +51,13 @@ public class MainActivity extends ARActivity {
 	
 	private Button cancelButton;
 	private Button modifyButton;
+
 	private Button igtlButton;
 	private TextView igtlMessage;
 	private boolean igtlStatus = false;
 	private IGTLServer igtlServer;
+	private CursorView cursorView;
+	private boolean igtlSend = false;
 	
 	private Button readFileButton, writeFileButton;
 	private String filename = "G.txt";
@@ -69,6 +71,7 @@ public class MainActivity extends ARActivity {
 	private String ipAddress;
 	
 	private Matrix T;
+
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,7 @@ public class MainActivity extends ARActivity {
         setContentView(R.layout.main);
 		mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
 
+		cursorView = new CursorView(this);
         
         ipAddress = getIPAddress();
         ((TextView)this.findViewById(R.id.IPAddressDisp)).setText("IP: " + ipAddress);
@@ -97,6 +101,8 @@ public class MainActivity extends ARActivity {
 					igtlButton.setText("OpenIGTLink stop");
 					igtlButton.setBackgroundColor(Color.GREEN);
 			        igtlServer = new IGTLServer(igtlMsgHandler);
+					mainLayout.addView(cursorView);
+					cursorView.invalidate();
 			        igtlStatus = true;
 			        Log.i(TAG, "Start OpenIGTLink");
 				}
@@ -105,7 +111,9 @@ public class MainActivity extends ARActivity {
 					igtlButton.setBackgroundColor(Color.MAGENTA);
 					igtlServer.stop();
 					igtlServer = null;
+					System.gc();
 					igtlStatus = false;
+					mainLayout.removeView(cursorView);
 			        Log.i(TAG, "Stop OpenIGTLink");
 				}
 			}        	
@@ -208,6 +216,8 @@ public class MainActivity extends ARActivity {
 						+ "Position[0]: " + t.getPositionArray()[0] + System.getProperty("line.separator")
 						+ "Position[1]: " + t.getPositionArray()[1] + System.getProperty("line.separator")
 						+ "Position[2]: " + t.getPositionArray()[2]);
+				cursorView.setXYZ((float)(t.getPositionArray()[0]), (float)(t.getPositionArray()[1]), (float)(t.getPositionArray()[2]));
+				cursorView.invalidate();
                 break;  
             case 0:  
                 break;

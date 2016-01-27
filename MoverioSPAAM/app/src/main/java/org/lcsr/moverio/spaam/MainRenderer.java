@@ -43,6 +43,7 @@ public class MainRenderer extends ARRenderer {
     private Matrix Util = null;
 
 
+
     public MainRenderer(VisualTracker vs) {
         super();
         visualTracker = vs;
@@ -139,6 +140,7 @@ public class MainRenderer extends ARRenderer {
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadMatrixf(trans, 0);
             cube.draw(gl);
+
         }
     }
 }
