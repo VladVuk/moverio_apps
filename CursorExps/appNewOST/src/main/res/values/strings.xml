@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">NOMoverioSPAAM</string>
-    <string name="def_TCPButton">TCPServer Start</string>
+    <string name="def_TCPButton">TCP/IP Start</string>
     <string name="def_ipAddress">IP Address</string>
     <string name="def_TCPDisp">Message</string>
     <string name="def_CancelButton">Cancel Last</string>

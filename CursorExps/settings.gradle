@@ -1,3 +1,5 @@
 include ':aRBaseLib'
 include ':appOldOST'
 include ':appNewOST'
+include ':appOldVST'
+include ':appNewVST'

@@ -44,6 +44,7 @@ import org.artoolkit.ar.base.ARToolKit;
 
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 /**
  * Base renderer which should be subclassed in the main application and provided 
@@ -53,17 +54,18 @@ import android.opengl.GLSurfaceView;
  * the Activity when AR initialisation is complete. The Renderer can use this method 
  * to add markers to the scene, and perform other scene initialisation.
  * 
- * The {@link draw} method should also be override to perfom actual rendering. This is 
+ * The {@link draw} method should also be override to perform actual rendering. This is
  * in preference to directly overriding {@link onDrawFrame}, because ARRenderer will check 
  * that the ARToolKit is running before calling draw.
  *
- */
-public class ARRenderer implements GLSurfaceView.Renderer {
+    */
+    public class ARRenderer implements GLSurfaceView.Renderer {
 	
     /**
      * Allows subclasses to load markers and prepare the scene. This is called after 
      * initialisation is complete.
      */
+    private final static String TAG = "ARRenderer";
 	public boolean configureARScene() {
 		return true;
 	}
@@ -71,11 +73,12 @@ public class ARRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {        
     	
     	// Transparent background
-    	GLES10.glClearColor(0.0f, 0.0f, 0.0f, 0.f);
+    	GLES10.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     public void onSurfaceChanged(GL10 unused, int w, int h) {
     	GLES10.glViewport(0, 0, w, h);
+        Log.i(TAG, "w: " + w + ", h: " + h);
     }
 
     public void onDrawFrame(GL10 gl) {
