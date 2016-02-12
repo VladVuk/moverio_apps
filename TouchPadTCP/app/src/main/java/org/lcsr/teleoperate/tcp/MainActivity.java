@@ -34,8 +34,8 @@ public class MainActivity extends Activity {
     private Button confirmBtn;
     private EditText hostnameEdit;
 
-    private int width = 639;
-    private int height = 479;
+    private int width = 960;
+    private int height = 480;
     private int clickDistance = 2;
     private int downX, downY, lastX, lastY, downScreenX, downScreenY, screenX, screenY;
     private int moveCount = 0;
@@ -116,7 +116,8 @@ public class MainActivity extends Activity {
                                 && (y - downY < clickDistance && downY - y < clickDistance)
                                 && moveCount < 7 && (!justClicked)) {
                             sendMessage(1, downScreenX + ";" + downScreenY + ";1;");
-                            justClicked = true;
+                            if ( downScreenX < 640 && downScreenY < 480 )
+                                justClicked = true;
                         }
                         moveCount = 0;
                         v.performClick();
