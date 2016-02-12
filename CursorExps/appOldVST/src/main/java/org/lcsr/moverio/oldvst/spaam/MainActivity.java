@@ -100,7 +100,7 @@ public class MainActivity extends ARActivity {
 				if ( spaam.cancelLast())
 					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
 				else
-					buildAlertMessageNoCube("You have not made any alignment");
+					Toast.makeText(MainActivity.this, "You have not made any alignment", Toast.LENGTH_SHORT).show();
 			}
         });
         
@@ -121,7 +121,7 @@ public class MainActivity extends ARActivity {
 			public void onClick(View v) {
 				File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
 				if ( !spaam.readFile(file))
-					buildAlertMessageNoCube("Read file falied");
+					Toast.makeText(MainActivity.this, "Read file failed", Toast.LENGTH_SHORT).show();
 				else
 					Toast.makeText(MainActivity.this, "File loaded", Toast.LENGTH_SHORT).show();
 			}
@@ -132,7 +132,7 @@ public class MainActivity extends ARActivity {
 			@Override
 			public void onClick(View v) {
 				if ( spaam.status == SPAAMStatus.CALIB_RAW )
-					buildAlertMessageNoCube("SPAAM not done");
+					Toast.makeText(MainActivity.this, "SPAAM not done", Toast.LENGTH_SHORT).show();
 				else {
 					// Write file for analysis
 					// DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -142,7 +142,7 @@ public class MainActivity extends ARActivity {
 					 File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
 
 					if ( !spaam.writeFile(file))
-						buildAlertMessageNoCube("Write file falied");
+						Toast.makeText(MainActivity.this, "Write file failed", Toast.LENGTH_SHORT).show();
 					else
 						Toast.makeText(MainActivity.this, "File written", Toast.LENGTH_SHORT).show();
 				}
@@ -158,7 +158,7 @@ public class MainActivity extends ARActivity {
 				T = visualTracker.getMarkerTransformation();
 				transformationChanged();
 				if (!visualTracker.visibility) {
-					buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
+					Toast.makeText(MainActivity.this, "Marker is invisible", Toast.LENGTH_SHORT).show();
 					return true;
 				} else {
 					switch (event.getAction()) {

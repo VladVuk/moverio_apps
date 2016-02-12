@@ -46,6 +46,9 @@ public class InteractiveView extends View {
 	private List<Point> squareScreenPoints; // length = 4
 	private boolean visibility = false;
 
+
+	private double trackX, trackY;
+
 	
 	public static enum PointType {PointCursor, PointCursorAdd, PointAlign, PointAlignAdd};
 	
@@ -67,11 +70,11 @@ public class InteractiveView extends View {
 		double[] td3 = {-20, -20, 0.0, 1.0};
 		double[] td4 = {-20, 20, 0.0, 1.0};
 		squareSpacePoints.add(new Matrix( td1, 4));
-		squareSpacePoints.add(new Matrix( td2, 4));
+		squareSpacePoints.add(new Matrix(td2, 4));
 		squareSpacePoints.add(new Matrix( td3, 4));
 		squareSpacePoints.add(new Matrix(td4, 4));
 		squareScreenPoints.add(new Point(0,0));
-		squareScreenPoints.add(new Point(0,0));
+		squareScreenPoints.add(new Point(0, 0));
 		squareScreenPoints.add(new Point(0,0));
 		squareScreenPoints.add(new Point(0, 0));
 	}
@@ -96,6 +99,7 @@ public class InteractiveView extends View {
 		switch (spaam.status) {
 		case CALIB_RAW:
 			drawPoint(paint, canvas, PointType.PointCursor);
+			drawTrackPoint(paint, canvas);
 			drawText(paint, canvas, "Current Alignments: " + spaam.countCurrent + " / " + spaam.countMax);
 			// drawAuxiliaryPoint(paint, canvas);
 			break;
@@ -120,6 +124,18 @@ public class InteractiveView extends View {
 		}
 
 		
+	}
+
+
+	public void updateTrackXY(double x, double y){
+		trackX = x;
+		trackY = y;
+	}
+
+
+	private void drawTrackPoint(Paint paint, Canvas canvas){
+		paint.setColor(Color.GREEN);
+		canvas.drawCircle((float)trackX, (float)trackY, 3f, paint);
 	}
 	
 	private void drawAuxiliaryPoint(Paint paint, Canvas canvas) {
