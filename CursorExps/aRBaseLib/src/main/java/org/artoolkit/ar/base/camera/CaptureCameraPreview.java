@@ -39,6 +39,7 @@ package org.artoolkit.ar.base.camera;
 
 import java.io.IOException;
 import java.lang.RuntimeException;
+import java.util.List;
 
 import org.artoolkit.ar.base.FPSCounter;
 import org.artoolkit.ar.base.R;
@@ -59,6 +60,8 @@ import android.view.SurfaceView;
 
 @SuppressLint("ViewConstructor")
 public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
+
+    public static int zoomValue = 0;
 
 	/**
 	 * Android logging tag for this class.
@@ -191,6 +194,9 @@ public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.C
         Camera.Parameters parameters = camera.getParameters();
         parameters.setPreviewSize(Integer.parseInt(dims[0]), Integer.parseInt(dims[1]));
         parameters.setPreviewFrameRate(30);
+
+        parameters.setZoom(zoomValue);
+
         camera.setParameters(parameters);
 
         parameters = camera.getParameters();
@@ -218,6 +224,7 @@ public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.C
         
         if (listener != null) listener.cameraPreviewStarted(captureWidth, captureHeight, captureRate, cameraIndex, cameraIsFrontFacing);
 
+
     }
 
     @Override
@@ -226,6 +233,16 @@ public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.C
 		if (listener != null) listener.cameraPreviewFrame(data);
 		
 		cameraWrapper.frameReceived(data);
+
+//        if (camera.getParameters().isZoomSupported()) {
+//            List<Integer> l = camera.getParameters().getZoomRatios();
+//            for (Integer i : l){
+//                Log.i(TAG, i.toString());
+//            }
+//        }
+//        else {
+//            Log.i(TAG, "Zoom not supported");
+//        }
 		
 		
 		if (fpsCounter.frame()) {

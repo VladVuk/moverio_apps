@@ -19,7 +19,7 @@ public class CursorView extends View {
     {
         super(context);
         pt = new Paint();
-        pt.setColor(Color.GREEN);
+        pt.setColor(Color.BLUE);
         x = 0;
         y = 0;
         z = 0;

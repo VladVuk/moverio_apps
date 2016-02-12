@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.artoolkit.ar.base.*;
+import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.newvst.spaam.util.*;
 import org.lcsr.moverio.newvst.spaam.util.SPAAM.SPAAMStatus;
@@ -219,6 +220,39 @@ public class MainActivity extends ARActivity {
 				}
 			}
 		});
+
+
+
+		mainLayout.setOnTouchListener(new OnTouchListener() {
+			@SuppressLint("ClickableViewAccessibility")
+			public boolean onTouch(View v, MotionEvent event) {
+				int x = (int) event.getX();
+				int y = (int) event.getY();
+				T = visualTracker.getMarkerTransformation();
+				transformationChanged();
+				if (!visualTracker.visibility) {
+					buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
+					return true;
+				} else {
+					switch (event.getAction()) {
+						case MotionEvent.ACTION_DOWN:
+							if (spaam.status == SPAAMStatus.CALIB_RAW) {
+								recordClick(event.getX(), event.getY());
+								spaam.newAlignment(x, y, T);
+							}
+							else if (spaam.status == SPAAMStatus.CALIB_ADD || spaam.status == SPAAMStatus.DONE_ADD)
+								spaam.newTuple(x, y, T);
+							break;
+						case MotionEvent.ACTION_UP:
+							v.performClick();
+							break;
+						default:
+							break;
+					}
+					return true;
+				}
+			}
+		});
     }
 
 
@@ -336,6 +370,7 @@ public class MainActivity extends ARActivity {
     @Override
     public void onResume() {
     	super.onResume();
+		CaptureCameraPreview.zoomValue = 10;
         intView = new InteractiveView(this, spaam);
     	mainLayout.addView(intView);
         intView.setGeometry(640, 480);

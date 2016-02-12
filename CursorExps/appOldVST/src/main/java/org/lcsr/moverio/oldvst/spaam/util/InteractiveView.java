@@ -130,7 +130,7 @@ public class InteractiveView extends View {
 	private void drawAuxiliaryPoint(Paint paint, Canvas canvas) {
 		Point p = spaam.getAuxiliaryPoint();
 		if ( p != null ) {
-			paint.setColor(Color.GREEN);
+			paint.setColor(Color.RED);
 			canvas.drawRect(p.x-cursorHalfLen, p.y-cursorHalfWid, p.x+cursorHalfLen, p.y+cursorHalfWid, paint);
 			canvas.drawRect(p.x-cursorHalfWid, p.y-cursorHalfLen, p.x+cursorHalfWid, p.y+cursorHalfLen, paint);
 		}

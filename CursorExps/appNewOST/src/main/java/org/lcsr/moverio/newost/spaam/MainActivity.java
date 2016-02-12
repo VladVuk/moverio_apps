@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.artoolkit.ar.base.*;
+import org.artoolkit.ar.base.camera.CaptureCameraPreview;
 import org.artoolkit.ar.base.rendering.ARRenderer;
 import org.lcsr.moverio.newost.spaam.util.*;
 import org.lcsr.moverio.newost.spaam.util.SPAAM.SPAAMStatus;
@@ -266,7 +267,7 @@ public class MainActivity extends ARActivity {
     @Override
     public void onResume() {
     	super.onResume();
-        intView = new InteractiveView(this, spaam);
+		intView = new InteractiveView(this, spaam);
     	mainLayout.addView(intView);
         intView.setGeometry(640, 480);
         Log.i(TAG, "InteractiveView added");

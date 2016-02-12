@@ -69,26 +69,27 @@ public class SPAAM {
 	
 	public void setupAuxiliaryPoints() {
 		auxiliaryPoints = new ArrayList<Point>();
-		auxiliaryPoints.add(new Point(120, 120));
-		auxiliaryPoints.add(new Point(320, 120));
-		auxiliaryPoints.add(new Point(520, 120));
-		auxiliaryPoints.add(new Point(120, 360));
-		auxiliaryPoints.add(new Point(320, 360));
-		auxiliaryPoints.add(new Point(520, 360));
+		int off = 160;
+		auxiliaryPoints.add(new Point(off, off));
+		auxiliaryPoints.add(new Point(320, off));
+		auxiliaryPoints.add(new Point(640-off, off));
+		auxiliaryPoints.add(new Point(off, 480-off));
+		auxiliaryPoints.add(new Point(320, 480-off));
+		auxiliaryPoints.add(new Point(640-off, 480-off));
 		auxiliaryPoints.add(new Point(240, 240));
 		auxiliaryPoints.add(new Point(400, 240));
-		auxiliaryPoints.add(new Point(120, 120));
-		auxiliaryPoints.add(new Point(320, 120));
-		auxiliaryPoints.add(new Point(520, 120));
-		auxiliaryPoints.add(new Point(120, 360));
-		auxiliaryPoints.add(new Point(320, 360));
-		auxiliaryPoints.add(new Point(520, 360));
+		auxiliaryPoints.add(new Point(off, off));
+		auxiliaryPoints.add(new Point(320, off));
+		auxiliaryPoints.add(new Point(640-off, off));
+		auxiliaryPoints.add(new Point(off, 480-off));
+		auxiliaryPoints.add(new Point(320, 480-off));
+		auxiliaryPoints.add(new Point(640-off, 480-off));
 		auxiliaryPoints.add(new Point(240, 240));
 		auxiliaryPoints.add(new Point(400, 240));
-		auxiliaryPoints.add(new Point(120, 240));
-		auxiliaryPoints.add(new Point(520, 240));
-		auxiliaryPoints.add(new Point(320, 120));
-		auxiliaryPoints.add(new Point(320, 360));
+		auxiliaryPoints.add(new Point(off, 240));
+		auxiliaryPoints.add(new Point(640-off, 240));
+		auxiliaryPoints.add(new Point(320, off));
+		auxiliaryPoints.add(new Point(320, 480-off));
 		Log.i(TAG, auxiliaryPoints.size() + " auxiliary points added");
 	}
 	
