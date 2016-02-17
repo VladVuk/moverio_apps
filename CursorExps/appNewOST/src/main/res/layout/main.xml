@@ -125,6 +125,19 @@
         </LinearLayout>
 
 
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Record"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/recordButton" />
+
         <TextView
             android:id="@+id/IPAddressDisp"
             android:layout_width="match_parent"

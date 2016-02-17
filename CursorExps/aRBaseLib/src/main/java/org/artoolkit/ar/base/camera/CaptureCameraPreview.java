@@ -62,6 +62,7 @@ import android.view.SurfaceView;
 public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     public static int zoomValue = 0;
+    public static int exposureComp = 0;
 
 	/**
 	 * Android logging tag for this class.
@@ -196,6 +197,8 @@ public class CaptureCameraPreview extends SurfaceView implements SurfaceHolder.C
         parameters.setPreviewFrameRate(30);
 
         parameters.setZoom(zoomValue);
+
+        parameters.setExposureCompensation(exposureComp);
 
         camera.setParameters(parameters);
 

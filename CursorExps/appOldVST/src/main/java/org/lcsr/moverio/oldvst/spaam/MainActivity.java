@@ -97,8 +97,10 @@ public class MainActivity extends ARActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( spaam.cancelLast())
+				if ( spaam.cancelLast()) {
 					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
+					recordCancel();
+				}
 				else
 					Toast.makeText(MainActivity.this, "You have not made any alignment", Toast.LENGTH_SHORT).show();
 			}
@@ -164,7 +166,7 @@ public class MainActivity extends ARActivity {
 					switch (event.getAction()) {
 						case MotionEvent.ACTION_DOWN:
 							if (spaam.status == SPAAMStatus.CALIB_RAW) {
-								recordClick(event.getX(), event.getY());
+								recordClick(x, y);
 								spaam.newAlignment(x, y, T);
 							}
 							else if (spaam.status == SPAAMStatus.CALIB_ADD || spaam.status == SPAAMStatus.DONE_ADD)
@@ -190,7 +192,7 @@ public class MainActivity extends ARActivity {
 					try {
 						DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 						String date = df.format(Calendar.getInstance().getTime());
-						recordFile = new File(Environment.getExternalStorageDirectory(), "Old_" + date + ".txt");
+						recordFile = new File(Environment.getExternalStorageDirectory(), "OV_" + date + ".txt");
 						if (!recordFile.exists())
 							recordFile.createNewFile();
 						recordStream = new FileOutputStream(recordFile);
@@ -216,21 +218,6 @@ public class MainActivity extends ARActivity {
 			}
 		});
     }
-
-
-	private void buildAlertMessageNoCube(String alertText)
-	{
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(alertText)
-				.setCancelable(false)
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog,  final int id) {
-						dialog.cancel();
-					}
-				});
-		final AlertDialog alert = builder.create();
-		alert.show();
-	}
 	
 	
     
@@ -247,12 +234,20 @@ public class MainActivity extends ARActivity {
 					String ss = "#" + System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 				} else {
-					Matrix tMatrix = renderer.getmProj().times(T.times(singlePoint));
-					tMatrix = tMatrix.times(1.0 / tMatrix.get(3, 0));
-					String ss = "* " + (640.0 * (tMatrix.get(0,0) + 1.0) / 2.0) + " "
-							+ (480.0 * (-tMatrix.get(1,0) + 1.0) / 2.0)
-							+ System.getProperty("line.separator");
+					String ss = "*1 " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +  System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
+					ss = ss + "*2 " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +  System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+					ss = ss + "*3 " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) +  System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+//					Matrix tMatrix = renderer.getmProj().times(T.times(singlePoint));
+//					tMatrix = tMatrix.times(1.0 / tMatrix.get(3, 0));
+//					double trackX = 640.0 * (tMatrix.get(0,0) + 1.0) / 2.0;
+//					double trackY = 480.0 * (-tMatrix.get(1,0) + 1.0) / 2.0;
+//					String ss = "* " + trackX + " " + trackY + System.getProperty("line.separator");
+//					if ( intView != null ) {
+//						intView.updateTrackXY(trackX, trackY);
+//					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -275,6 +270,16 @@ public class MainActivity extends ARActivity {
 		}
 	}
 
+	public void recordCancel() {
+		if (recording) {
+			try {
+				String ss = "- " + System.getProperty("line.separator");
+				recordStream.write(ss.getBytes());
+			} catch( Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
 
     @Override
     protected ARRenderer supplyRenderer() {

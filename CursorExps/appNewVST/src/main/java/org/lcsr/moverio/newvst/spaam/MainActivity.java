@@ -22,8 +22,6 @@ import org.lcsr.moverio.newvst.spaam.util.SPAAM.SPAAMStatus;
 
 import Jama.Matrix;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -38,7 +36,6 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +74,8 @@ public class MainActivity extends ARActivity {
 	private VisualTracker visualTracker;
 	
 	private String ipAddress;
+
+	private String recordFilename;
 	
 	private Matrix T, singlePoint;
 
@@ -136,8 +135,10 @@ public class MainActivity extends ARActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( spaam.cancelLast())
+				if ( spaam.cancelLast()) {
 					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
+					recordCancel();
+				}
 				else
 					Toast.makeText(MainActivity.this, "You have not made any alignment", Toast.LENGTH_SHORT).show();
 			}
@@ -198,7 +199,8 @@ public class MainActivity extends ARActivity {
 					try {
 					 	DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 					 	String date = df.format(Calendar.getInstance().getTime());
-						recordFile = new File(Environment.getExternalStorageDirectory(), "New_" + date + ".txt");
+						recordFilename = "NV_" + date + ".txt";
+						recordFile = new File(Environment.getExternalStorageDirectory(), recordFilename);
 						if (!recordFile.exists())
 							recordFile.createNewFile();
 						recordStream = new FileOutputStream(recordFile);
@@ -276,7 +278,7 @@ public class MainActivity extends ARActivity {
 
 					if ( z < 0 )
 						cursorView.setXYZ(x, y, z);
-					else {
+					else if (z == 1) {
 						// video is clicked
 						if ( x <= 640 && y <= 480 ) {
 							T = visualTracker.getMarkerTransformation();
@@ -302,6 +304,9 @@ public class MainActivity extends ARActivity {
 							recordButton.performClick();
 						}
 					}
+					else if (z == 2) {
+						cancelButton.performClick();
+					}
 					cursorView.invalidate();
 					break;
 				default:
@@ -310,21 +315,6 @@ public class MainActivity extends ARActivity {
 		}
 	};
 
-
-	private void buildAlertMessageNoCube(String alertText)
-	{
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(alertText)
-				.setCancelable(false)
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog,  final int id) {
-						dialog.cancel();
-					}
-				});
-		final AlertDialog alert = builder.create();
-		alert.show();
-	}
-	
 	
     
     @Override
@@ -340,15 +330,22 @@ public class MainActivity extends ARActivity {
 					String ss = "#" + System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 				} else {
-					Matrix tMatrix = renderer.getmProj().times(T.times(singlePoint));
-					tMatrix = tMatrix.times(1.0 / tMatrix.get(3, 0));
-					double trackX = 640.0 * (tMatrix.get(0,0) + 1.0) / 2.0;
-					double trackY = 480.0 * (-tMatrix.get(1,0) + 1.0) / 2.0;
-					String ss = "* " + trackX + " " + trackY + System.getProperty("line.separator");
+					String ss = "*1 " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +  System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
-					if ( intView != null ) {
-						intView.updateTrackXY(trackX, trackY);
-					}
+					ss = "*2 " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +  System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+					ss = "*3 " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) +  System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+
+
+//					Matrix tMatrix = renderer.getmProj().times(T.times(singlePoint));
+//					tMatrix = tMatrix.times(1.0 / tMatrix.get(3, 0));
+//					double trackX = 640.0 * (tMatrix.get(0,0) + 1.0) / 2.0;
+//					double trackY = 480.0 * (-tMatrix.get(1,0) + 1.0) / 2.0;
+//					String ss = "* " + trackX + " " + trackY + System.getProperty("line.separator");
+//					if ( intView != null ) {
+//						intView.updateTrackXY(trackX, trackY);
+//					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -370,6 +367,18 @@ public class MainActivity extends ARActivity {
 			}
 		}
 	}
+
+	public void recordCancel() {
+		if (recording) {
+			try {
+				String ss = "- " + System.getProperty("line.separator");
+				recordStream.write(ss.getBytes());
+			} catch( Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 
     @Override

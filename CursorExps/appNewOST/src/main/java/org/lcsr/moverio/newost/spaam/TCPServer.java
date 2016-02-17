@@ -45,11 +45,11 @@ public class TCPServer  {
         status = false;
     }
 
-    public class TCPAction extends AsyncTask<Void, Void, Void>{
+    public class TCPAction extends AsyncTask<Void, Void, Void> {
         private ServerSocket ss;
         private Socket s;
         private BufferedReader in;
-        private Bundle u;
+//        private Bundle u;
 
 
         public TCPAction(){
@@ -64,16 +64,17 @@ public class TCPServer  {
                 Log.i(TAG, "accept");
                 in = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 String incomingMsg;
-                u = new Bundle();
                 while ((incomingMsg = in.readLine()) != null ){
+                    Bundle u = new Bundle();
                     final String finalMessage = incomingMsg;
                     String[] slist = finalMessage.split(";");
-                    if ( slist.length >= 3 ) {
+                    if ( slist.length >= 4 ) {
                         Message m = uiHandler.obtainMessage();
                         m.what = 1;
                         u.putInt("x", Integer.parseInt(slist[0]));
                         u.putInt("y", Integer.parseInt(slist[1]));
                         u.putInt("z", Integer.parseInt(slist[2]));
+                        u.putInt("s", Integer.parseInt(slist[3]));
                         m.setData(u);
                         uiHandler.sendMessage(m);
                     }
