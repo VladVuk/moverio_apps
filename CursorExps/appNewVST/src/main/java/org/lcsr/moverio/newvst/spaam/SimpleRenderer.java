@@ -103,11 +103,11 @@ public class SimpleRenderer extends ARRenderer {
 //            }
 //            cube.draw(gl);
         }
-
-//        Log.i(TAG, "glProj1: " + glProj[0] + ", " + glProj[1] + ", " + glProj[2] + ", " + glProj[3]);
-//        Log.i(TAG, "glProj2: " + glProj[4] + ", " + glProj[5] + ", " + glProj[6] + ", " + glProj[7]);
-//        Log.i(TAG, "glProj3: " + glProj[8] + ", " + glProj[9] + ", " + glProj[10] + ", " + glProj[11]);
-//        Log.i(TAG, "glProj4: " + glProj[12] + ", " + glProj[13] + ", " + glProj[14] + ", " + glProj[15]);
+//
+//        Log.i(TAG, "glProj1: " + mProj.get(0,0) + ", " + mProj.get(0,1) + ", " + mProj.get(0,2) + ", " + mProj.get(0,3));
+//        Log.i(TAG, "glProj2: " + mProj.get(1,0) + ", " + mProj.get(1,1) + ", " + mProj.get(1,2) + ", " + mProj.get(1,3));
+//        Log.i(TAG, "glProj3: " + mProj.get(2,0) + ", " + mProj.get(2,1) + ", " + mProj.get(2,2) + ", " + mProj.get(2,3));
+//        Log.i(TAG, "glProj4: " + mProj.get(3,0) + ", " + mProj.get(3,1) + ", " + mProj.get(3,2) + ", " + mProj.get(3,3));
 
     }
 

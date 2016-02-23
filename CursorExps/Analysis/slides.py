@@ -58,9 +58,9 @@ def slideShow(save):
 		size = random.uniform(0.5, 0.65)
 		dst = placeMarker(fixedPointList[i][0], fixedPointList[i][1], 30.0/(magic[i]*3+50))
 		dst = changeBackground(dst)
-		dst = cv2.resize(dst,None,fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
+		# dst = cv2.resize(dst,None,fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
 		if save:
-			cv2.imwrite("slides/slide_"+str(i)+".bmp", dst)
+			cv2.imwrite("slides_small/slide_"+str(i)+".bmp", dst)
 		cv2.imshow("slide", dst)
 		c = cv2.waitKey(0)
 		print c

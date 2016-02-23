@@ -225,11 +225,9 @@ public class MainActivity extends ARActivity {
 					String ss = "#" + System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 				} else {
-					String ss = "*1 " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +  System.getProperty("line.separator");
-					recordStream.write(ss.getBytes());
-					ss = "*2 " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +  System.getProperty("line.separator");
-					recordStream.write(ss.getBytes());
-					ss = "*3 " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) +  System.getProperty("line.separator");
+					String ss = "* " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +
+							" " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +
+							" " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) +  System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 
 				}

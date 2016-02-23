@@ -5,7 +5,7 @@ import os
 import socket
 
 TCP_IP = '10.189.175.110'
-TCP_PORT = 18944
+TCP_PORT = 18940
 BUFFER_SIZE = 1024
 
 X_OFFSET = 0
@@ -66,7 +66,7 @@ while not done:
 	else:
 		screen.fill((128, 128, 128))
 
-		image = pygame.image.load("pics/slide_" + str(i) + ".bmp")
+		image = pygame.image.load("slides_small/slide_" + str(i) + ".bmp")
 		screen.blit(image, (X_OFFSET,Y_OFFSET))
 		pygame.display.flip()
 

@@ -24,6 +24,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import Jama.Matrix;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
@@ -36,6 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -106,7 +108,7 @@ public class MainActivity extends ARActivity {
 		tcpMessage = (TextView)this.findViewById(R.id.TCPDisp);
         
         tcpButton = (Button)this.findViewById(R.id.TCPButton);
-		tcpServer = new TCPServer(18944);
+		tcpServer = new TCPServer(18940);
 		tcpButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -178,7 +180,7 @@ public class MainActivity extends ARActivity {
 					// String date = df.format(Calendar.getInstance().getTime());
 					// File file = new File(Environment.getExternalStorageDirectory(), "G-" + date + ".txt");
 					// Normal write file
-					File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
+					File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + "01.txt");
 
 					if (!spaam.writeFile(file))
 						Toast.makeText(MainActivity.this, "Write file failed", Toast.LENGTH_SHORT).show();
@@ -194,9 +196,7 @@ public class MainActivity extends ARActivity {
 			public void onClick(View v) {
 				if ( !recording ) {
 					try {
-						DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-						String date = df.format(Calendar.getInstance().getTime());
-						recordFilename = "NO_" + date + ".txt";
+						recordFilename = filenameEdit.getText().toString() + "_NO.txt";
 						recordFile = new File(Environment.getExternalStorageDirectory(), recordFilename);
 						if (!recordFile.exists())
 							recordFile.createNewFile();
@@ -204,6 +204,8 @@ public class MainActivity extends ARActivity {
 						recording = true;
 						recordButton.setText("Stop");
 						Log.i(TAG, "recording started");
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mainLayout.getWindowToken(), 0);
 					}
 					catch (Exception e){
 						e.printStackTrace();
@@ -325,11 +327,9 @@ public class MainActivity extends ARActivity {
 					String ss = "#" + System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 				} else {
-					String ss = "*1 " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +  System.getProperty("line.separator");
-					recordStream.write(ss.getBytes());
-					ss = "*2 " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +  System.getProperty("line.separator");
-					recordStream.write(ss.getBytes());
-					ss = "*3 " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) +  System.getProperty("line.separator");
+					String ss = "* " + T.get(0,0) + " " + T.get(0,1) + " " + T.get(0,2) + " " + T.get(0,3) +
+							" " + T.get(1,0) + " " + T.get(1,1) + " " + T.get(1,2) + " " + T.get(1,3) +
+							" " + T.get(2,0) + " " + T.get(2,1) + " " + T.get(2,2) + " " + T.get(2,3) + System.getProperty("line.separator");
 					recordStream.write(ss.getBytes());
 
 
@@ -366,7 +366,7 @@ public class MainActivity extends ARActivity {
 	public void recordCancel() {
 		if (recording) {
 			try {
-				String ss = "- " + System.getProperty("line.separator");
+				String ss = "% " + System.getProperty("line.separator");
 				recordStream.write(ss.getBytes());
 			} catch( Exception e){
 				e.printStackTrace();
@@ -405,7 +405,19 @@ public class MainActivity extends ARActivity {
 		Log.i(TAG, "InteractiveView added");
     	hideCameraPreview();
     }
-    
+
+	@Override
+	public void onPause(){
+		if (recording){
+			recordButton.performClick();
+		}
+		writeFileButton.performClick();
+		if (tcpServer.getStatus()){
+			tcpServer.stopTask();
+		}
+		super.onPause();
+	}
+
     @Override
     public void onStop() {
     	super.onStop();

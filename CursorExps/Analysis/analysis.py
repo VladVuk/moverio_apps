@@ -22,6 +22,41 @@ fixedPointList = [(off,off), (320, off), (640-off,off), (off,480-off), (320,480-
 					(400,240), (off,240), (640-off,240), (320,off), (320,480-off)]
 
 
+transformation = np.zeros([4,4])
+transformation[3,3] = 1.0
+
+def pushMatrix(floats, i):
+	if i == 0:
+		transformation[0,0] = floats[0]
+		transformation[0,1] = floats[1]
+		transformation[0,2] = floats[2]
+		transformation[0,3] = floats[3]
+		transformation[1,0] = floats[4]
+		transformation[1,1] = floats[5]
+		transformation[1,2] = floats[6]
+		transformation[1,3] = floats[7]
+		transformation[2,0] = floats[8]
+		transformation[2,1] = floats[9]
+		transformation[2,2] = floats[10]
+		transformation[2,3] = floats[11]
+	else:
+		transformation[i-1,0] = floats[0]
+		transformation[i-1,1] = floats[1]
+		transformation[i-1,2] = floats[2]
+		transformation[i-1,3] = floats[3]
+
+
+projection = np.array([[2.3174095153808594, 0.0, -0.19314861297607422, 0.0],
+	[0.0, 3.1142921447753906, 0.0605013370513916, 0.0],
+	[0.0, 0.0, -1.0020020008087158, -20.02001953125],
+	[0.0, 0.0, -1.0, 0.0]])
+singlePoint = np.array([[0.0],[0.0],[0.0],[1.0]])
+def getTrackedPos():
+	temp = projection.dot(transformation.dot(singlePoint))
+	temp = temp / temp[3,0]
+	return 640.0 * (temp[0,0] + 1.0) / 2.0, 480.0 * (-temp[1,0] + 1.0) / 2.0
+
+
 
 
 def normalizedX(X):
@@ -62,8 +97,10 @@ for filename in filenames:
 			words = line.split()
 			if words[0] == '$':
 				targetList.append((float(words[1]), float(words[2])))
+			elif words[0] == '%':
+				targetList = targetList[:-1]
 
-	# print len(targetList)
+	print len(targetList)
 
 	targetCountMax = len(targetList)
 	f = open(filename)
@@ -79,12 +116,26 @@ for filename in filenames:
 	Y = targetList[targetCount][1]
 	for line in f:
 		words = line.split()
-		if words[0] == '*':
-			x = float(words[1])
-			y = float(words[2])
+		if words[0] == "*1":
+			results = [float(i) for i in words[1:]]
+			pushMatrix(results, 1)
+		elif words[0] == "*2":
+			results = [float(i) for i in words[1:]]
+			pushMatrix(results, 2)
+		elif words[0] == "*3":
+			results = [float(i) for i in words[1:]]
+			pushMatrix(results, 3)
+			x, y = getTrackedPos()
+			# print x-normalizedX(X), y-normalizedY(Y)
+			currentDistances.append((x-normalizedX(X), y-normalizedY(Y)))
+		elif words[0] == "*":
+			results = [float(i) for i in words[1:]]
+			pushMatrix(results, 0)
+			x, y = getTrackedPos()
 			currentDistances.append((x-normalizedX(X), y-normalizedY(Y)))
 		elif words[0] == '$':
 			targetCount += 1
+			# raw_input()
 			if targetCount == targetCountMax:
 				break
 			else:
@@ -100,7 +151,6 @@ for filename in filenames:
 	'''
 	array = list()
 	for d in totalDistances:
-		# print len(d)
 		avgNumCurrent = min(len(d), avgNum)
 		if avgNumCurrent == 1:
 			continue
@@ -109,6 +159,8 @@ for filename in filenames:
 		# yavg = np.mean(d[-avgNumCurrent:][1])
 		xavg = d[-1][0]
 		yavg = d[-1][1]
+		if abs(xavg) > 400 or abs(yavg) > 400:
+			continue
 		array.append(math.sqrt(xavg**2 + yavg**2))
 
 

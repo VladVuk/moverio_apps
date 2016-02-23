@@ -16,7 +16,6 @@ import java.util.Calendar;
 
 import org.artoolkit.ar.base.*;
 import org.artoolkit.ar.base.rendering.ARRenderer;
-import org.lcsr.moverio.oldost.igtlink.IGTLServer;
 import org.lcsr.moverio.oldost.spaam.util.*;
 import org.lcsr.moverio.oldost.spaam.util.SPAAM.SPAAMStatus;
 
