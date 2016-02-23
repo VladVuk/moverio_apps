@@ -125,49 +125,17 @@
         </LinearLayout>
 
 
-        <TextView
-            android:id="@+id/IPAddressDisp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:text="@string/def_ipAddress"
-            android:textColor="@android:color/white"
-            android:textSize="20sp" />
-
         <Button
-            android:id="@+id/IGTButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/def_IGTButton"
-            android:textColor="@android:color/white"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/OpenIGTDisp"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="0.12"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:text="@string/def_IGTDisp"
+            android:text="Record"
             android:textColor="@android:color/white"
             android:textSize="20sp"
-            android:maxLines="10" />
-
-
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/recordButton" />
 
     </LinearLayout>
     

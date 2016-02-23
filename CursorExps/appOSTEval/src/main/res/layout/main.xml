@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topLayout"
+    android:layout_width="960dp"
+    android:layout_height="540dp"
+    android:background="@android:color/black"
+    android:orientation="horizontal" >
+
+    <FrameLayout
+        android:id="@+id/mainLayout"
+        android:layout_width="640dp"
+        android:layout_height="480dp"
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        >
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/toolLayout"
+        android:layout_width="320dp"
+        android:layout_height="480dp"
+        android:orientation="vertical" >
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="0dp"
+            android:layout_marginStart="0dp"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/ReadButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                android:text="@string/def_ReadButton"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:layout_marginRight="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+
+            <TextView
+                android:id="@+id/fileName"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Filename:"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp" />
+
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/editText"
+                android:editable="true"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:layout_marginRight="20dp"
+                android:inputType="textNoSuggestions" />
+
+
+        </LinearLayout>
+
+
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Record"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/recordButton" />
+
+        <TextView
+            android:id="@+id/IPAddressDisp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/def_ipAddress"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/TCPButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/def_TCPButton"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/TCPDisp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.12"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/def_TCPDisp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:maxLines="10" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -403,7 +403,7 @@ public class MainActivity extends ARActivity {
     	mainLayout.addView(intView);
         intView.setGeometry(640, 480);
 		Log.i(TAG, "InteractiveView added");
-//    	hideCameraPreview();
+    	hideCameraPreview();
     }
     
     @Override

@@ -23,6 +23,7 @@ import org.lcsr.moverio.oldvst.spaam.util.SPAAM.SPAAMStatus;
 import Jama.Matrix;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -65,10 +67,8 @@ public class MainActivity extends ARActivity {
 	private InteractiveView intView;
 	
 	private VisualTracker visualTracker;
-	
-	private String ipAddress;
-	
-	private Matrix T, singlePoint;
+
+	private Matrix T;
 
 	
     @Override
@@ -79,18 +79,12 @@ public class MainActivity extends ARActivity {
         spaam.setMaxAlignment(20);
 //		renderer = new MainRenderer(visualTracker);
 		renderer = new SimpleRenderer(visualTracker);
-		singlePoint = new Matrix(4,1,0.0);
-		singlePoint.set(3,0,1.0);
 
         setContentView(R.layout.main);
 		mainLayout = (FrameLayout)this.findViewById(R.id.mainLayout);
 
 		filenameEdit = (EditText) this.findViewById(R.id.editText);
 
-        
-        ipAddress = getIPAddress();
-        ((TextView)this.findViewById(R.id.IPAddressDisp)).setText("IP: " + ipAddress);
-		Log.i(TAG, ipAddress);
 
         
         cancelButton = (Button)this.findViewById(R.id.CancelButton);
@@ -136,11 +130,6 @@ public class MainActivity extends ARActivity {
 				if ( spaam.status == SPAAMStatus.CALIB_RAW )
 					Toast.makeText(MainActivity.this, "SPAAM not done", Toast.LENGTH_SHORT).show();
 				else {
-					// Write file for analysis
-					// DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-					// String date = df.format(Calendar.getInstance().getTime());
-					// File file = new File(Environment.getExternalStorageDirectory(), "G-" + date + ".txt");
-					// Normal write file
 					 File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
 
 					if ( !spaam.writeFile(file))
@@ -190,14 +179,14 @@ public class MainActivity extends ARActivity {
 			public void onClick(View v) {
 				if ( !recording ) {
 					try {
-						DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-						String date = df.format(Calendar.getInstance().getTime());
-						recordFile = new File(Environment.getExternalStorageDirectory(), "OV_" + date + ".txt");
+						recordFile = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + "_OV.txt");
 						if (!recordFile.exists())
 							recordFile.createNewFile();
 						recordStream = new FileOutputStream(recordFile);
 						recording = true;
 						recordButton.setText("Stop");
+						InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mainLayout.getWindowToken(), 0);
 						Log.i(TAG, "recording started");
 					}
 					catch (Exception e){
@@ -273,7 +262,7 @@ public class MainActivity extends ARActivity {
 	public void recordCancel() {
 		if (recording) {
 			try {
-				String ss = "- " + System.getProperty("line.separator");
+				String ss = "% " + System.getProperty("line.separator");
 				recordStream.write(ss.getBytes());
 			} catch( Exception e){
 				e.printStackTrace();
@@ -302,6 +291,14 @@ public class MainActivity extends ARActivity {
     	mainLayout.addView(intView);
         Log.i(TAG, "InteractiveView added");
     }
+
+	@Override
+	public void onPause(){
+		if (recording){
+			recordButton.performClick();
+		}
+		super.onPause();
+	}
     
     @Override
     public void onStop() {
@@ -311,11 +308,5 @@ public class MainActivity extends ARActivity {
     	spaam = null;
     }
 
-    
-	
-	@SuppressWarnings("deprecation")
-	protected String getIPAddress() {
-        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-        return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-    }
+
 }

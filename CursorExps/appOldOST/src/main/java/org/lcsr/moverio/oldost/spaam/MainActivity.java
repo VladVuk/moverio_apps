@@ -9,6 +9,7 @@
 package org.lcsr.moverio.oldost.spaam;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,6 +24,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import Jama.Matrix;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
@@ -35,6 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -53,24 +56,21 @@ public class MainActivity extends ARActivity {
 	private Button cancelButton;
 	private Button modifyButton;
 
-	private Button igtlButton;
-	private TextView igtlMessage;
-	private boolean igtlStatus = false;
-	private IGTLServer igtlServer;
-	private CursorView cursorView;
-	private boolean igtlSend = false;
-	
 	private Button readFileButton, writeFileButton;
 	private EditText filenameEdit;
+
+	// Recording stuff
+	private Button recordButton;
+	private boolean recording = false;
+	private File recordFile;
+	private FileOutputStream recordStream;
 
 	private SPAAM spaam;
 	
 	private InteractiveView intView;
 	
 	private VisualTracker visualTracker;
-	
-	private String ipAddress;
-	
+
 	private Matrix T;
 
 	
@@ -88,48 +88,17 @@ public class MainActivity extends ARActivity {
 
 		filenameEdit = (EditText) this.findViewById(R.id.editText);
 
-		cursorView = new CursorView(this);
-        
-        ipAddress = getIPAddress();
-        ((TextView)this.findViewById(R.id.IPAddressDisp)).setText("IP: " + ipAddress);
-        Log.i(TAG, ipAddress);
-        
-        igtlMessage = (TextView)this.findViewById(R.id.OpenIGTDisp);
-        
-        igtlButton = (Button)this.findViewById(R.id.IGTButton);
-        igtlButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if ( !igtlStatus ) {
-					igtlButton.setText("OpenIGTLink stop");
-					igtlButton.setBackgroundColor(Color.GREEN);
-			        igtlServer = new IGTLServer(igtlMsgHandler);
-					mainLayout.addView(cursorView);
-					cursorView.invalidate();
-			        igtlStatus = true;
-			        Log.i(TAG, "Start OpenIGTLink");
-				}
-				else {
-					igtlButton.setText("OpenIGTLink start");
-					igtlButton.setBackgroundColor(Color.MAGENTA);
-					igtlServer.stop();
-					igtlServer = null;
-					System.gc();
-					igtlStatus = false;
-					mainLayout.removeView(cursorView);
-			        Log.i(TAG, "Stop OpenIGTLink");
-				}
-			}        	
-        });
-        
+
         cancelButton = (Button)this.findViewById(R.id.CancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if ( spaam.cancelLast())
+				if ( spaam.cancelLast()) {
 					Toast.makeText(MainActivity.this, "Last alignment cancelled", Toast.LENGTH_SHORT).show();
+					recordCancel();
+				}
 				else
-					buildAlertMessageNoCube("You have not made any alignment");
+					Toast.makeText(MainActivity.this, "You have not made any alignment", Toast.LENGTH_SHORT).show();
 			}
         });
         
@@ -150,7 +119,7 @@ public class MainActivity extends ARActivity {
 			public void onClick(View v) {
 				File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
 				if ( !spaam.readFile(file))
-					buildAlertMessageNoCube("Read file falied");
+					Toast.makeText(MainActivity.this, "Read file failed", Toast.LENGTH_SHORT).show();
 				else
 					Toast.makeText(MainActivity.this, "File loaded", Toast.LENGTH_SHORT).show();
 			}
@@ -161,17 +130,12 @@ public class MainActivity extends ARActivity {
 			@Override
 			public void onClick(View v) {
 				if ( spaam.status == SPAAMStatus.CALIB_RAW )
-					buildAlertMessageNoCube("SPAAM not done");
+					Toast.makeText(MainActivity.this, "SPAAM not done", Toast.LENGTH_SHORT).show();
 				else {
-					// Write file for analysis
-					// DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-					// String date = df.format(Calendar.getInstance().getTime());
-					// File file = new File(Environment.getExternalStorageDirectory(), "G-" + date + ".txt");
-					// Normal write file
-					 File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + ".txt");
+					 File file = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + "00.txt");
 
 					if ( !spaam.writeFile(file))
-						buildAlertMessageNoCube("Write file falied");
+						Toast.makeText(MainActivity.this, "Write file failed", Toast.LENGTH_SHORT).show();
 					else
 						Toast.makeText(MainActivity.this, "File written", Toast.LENGTH_SHORT).show();
 				}
@@ -187,14 +151,16 @@ public class MainActivity extends ARActivity {
                 T = visualTracker.getMarkerTransformation();
                 transformationChanged();
                 if ( !visualTracker.visibility ) {
-                	buildAlertMessageNoCube("You need to see the cube in order for the calibration to work");
+					Toast.makeText(MainActivity.this, "Marker is invisible", Toast.LENGTH_SHORT).show();
                 	return true;
                 }
                 else {
 	        		switch (event.getAction()) {
 	        	    case MotionEvent.ACTION_DOWN:
-	        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW )
+	        	    	if ( spaam.status == SPAAMStatus.CALIB_RAW ) {
+							recordClick(x, y);
 							spaam.newAlignment(x, y, T);
+						}
 						else if ( spaam.status == SPAAMStatus.CALIB_ADD || spaam.status == SPAAMStatus.DONE_ADD )
 							spaam.newTuple(x, y, T);
 						break;
@@ -208,43 +174,62 @@ public class MainActivity extends ARActivity {
                 }
         	}
         });
-    }
-    
-    @SuppressLint("HandlerLeak")
-	private Handler igtlMsgHandler = new Handler() {  
-        public void handleMessage (Message msg) { 
-            switch(msg.what) {
-            case 1:
-            	TransformNR t = (TransformNR)msg.obj;
-        		igtlMessage.setText("Received Package: Transform" + System.getProperty("line.separator")
-						+ "Position[0]: " + t.getPositionArray()[0] + System.getProperty("line.separator")
-						+ "Position[1]: " + t.getPositionArray()[1] + System.getProperty("line.separator")
-						+ "Position[2]: " + t.getPositionArray()[2]);
-				cursorView.setXYZ((float)(t.getPositionArray()[0]), (float)(t.getPositionArray()[1]), (float)(t.getPositionArray()[2]));
-				cursorView.invalidate();
-                break;  
-            case 0:  
-                break;
-            }
-        }  
-    };
-    
 
-	private void buildAlertMessageNoCube(String alertText)
-	{
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(alertText)
-				.setCancelable(false)
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog,  final int id) {
-						dialog.cancel();
+
+		recordButton = (Button) findViewById(R.id.recordButton);
+		recordButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!recording) {
+					try {
+						recordFile = new File(Environment.getExternalStorageDirectory(), filenameEdit.getText().toString() + "_OO.txt");
+						if (!recordFile.exists())
+							recordFile.createNewFile();
+						recordStream = new FileOutputStream(recordFile);
+						recording = true;
+						recordButton.setText("Stop");
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mainLayout.getWindowToken(), 0);
+						Log.i(TAG, "recording started");
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				});
-		final AlertDialog alert = builder.create();
-		alert.show();
+				} else {
+					try {
+						recordStream.close();
+						recording = false;
+						recordButton.setText("Record");
+						Log.i(TAG, "recording ended");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+    }
+
+
+	public void recordClick(float x, float y){
+		if (recording) {
+			try {
+				String ss = "$ " + x + " " + y + System.getProperty("line.separator");
+				recordStream.write(ss.getBytes());
+			} catch( Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
-	
-	
+
+	public void recordCancel() {
+		if (recording) {
+			try {
+				String ss = "% " + System.getProperty("line.separator");
+				recordStream.write(ss.getBytes());
+			} catch( Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
     
     @Override
     public void onFrameProcessed() {
@@ -257,9 +242,31 @@ public class MainActivity extends ARActivity {
     }
     
     public void transformationChanged() {
-    	if ( T != null && igtlStatus ) {
-			igtlServer.sendTransform(T);
-    	}
+		if ( recording ) {
+			try {
+				if (T == null) {
+					String ss = "#" + System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+				} else {
+					String ss = "*1 " + T.get(0, 0) + " " + T.get(0, 1) + " " + T.get(0, 2) + " " + T.get(0, 3) + System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+					ss = ss + "*2 " + T.get(1, 0) + " " + T.get(1, 1) + " " + T.get(1, 2) + " " + T.get(1, 3) + System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+					ss = ss + "*3 " + T.get(2, 0) + " " + T.get(2, 1) + " " + T.get(2, 2) + " " + T.get(2, 3) + System.getProperty("line.separator");
+					recordStream.write(ss.getBytes());
+//					Matrix tMatrix = renderer.getmProj().times(T.times(singlePoint));
+//					tMatrix = tMatrix.times(1.0 / tMatrix.get(3, 0));
+//					double trackX = 640.0 * (tMatrix.get(0,0) + 1.0) / 2.0;
+//					double trackY = 480.0 * (-tMatrix.get(1,0) + 1.0) / 2.0;
+//					String ss = "* " + trackX + " " + trackY + System.getProperty("line.separator");
+//					if ( intView != null ) {
+//						intView.updateTrackXY(trackX, trackY);
+//					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
     	if ( intView != null  ) {
 			intView.updateTransformation(T);
     		intView.invalidate();
@@ -296,6 +303,15 @@ public class MainActivity extends ARActivity {
         Log.i(TAG, "InteractiveView added");
     	hideCameraPreview();
     }
+
+	@Override
+	public void onPause(){
+		if (recording){
+			recordButton.performClick();
+		}
+		writeFileButton.performClick();
+		super.onPause();
+	}
     
     @Override
     public void onStop() {
@@ -303,11 +319,6 @@ public class MainActivity extends ARActivity {
     	mainLayout.removeAllViews();
     	spaam.clearSPAAM();
     	spaam = null;
-    	if ( igtlServer != null ) {
-    		igtlServer.stop(); 
-    		igtlServer = null;
-    		igtlStatus = false;
-    	}
     }
     
     private void hideCameraPreview() {
@@ -317,10 +328,5 @@ public class MainActivity extends ARActivity {
     	getCameraPreview().setLayoutParams(layoutParams);
     }
     
-	
-	@SuppressWarnings("deprecation")
-	protected String getIPAddress() {
-        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-        return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-    }
+
 }
