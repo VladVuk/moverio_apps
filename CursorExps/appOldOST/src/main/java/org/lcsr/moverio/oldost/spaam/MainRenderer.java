@@ -139,7 +139,7 @@ public class MainRenderer extends ARRenderer {
 
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadMatrixf(trans, 0);
-            cube.draw(gl);
+//            cube.draw(gl);
 
         }
     }

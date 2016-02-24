@@ -287,7 +287,7 @@ public class MainActivity extends ARActivity {
     public void onResume() {
     	super.onResume();
 		CaptureCameraPreview.zoomValue = 0;
-		CaptureCameraPreview.exposureComp = 0;
+		CaptureCameraPreview.exposureComp = -2;
 		intView = new InteractiveView(this, spaam);
     	mainLayout.addView(intView);
         intView.setGeometry(640, 480);

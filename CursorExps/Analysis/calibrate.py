@@ -5,7 +5,14 @@ import os
 import socket
 
 TCP_IP = '10.189.175.110'
+
+# VST
+# TCP_PORT = 18944
+
+# OST
 TCP_PORT = 18940
+
+
 BUFFER_SIZE = 1024
 
 X_OFFSET = 0
@@ -13,14 +20,14 @@ Y_OFFSET = 0
 
 
 
-SOCKET = True
+SOCKET = False
 if SOCKET:
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((TCP_IP, TCP_PORT))
 
 pygame.init()
 
-screen = pygame.display.set_mode((1280, 960))
+screen = pygame.display.set_mode((640, 480))
 pygame.mouse.set_visible(False)
 done = False
 i = 0

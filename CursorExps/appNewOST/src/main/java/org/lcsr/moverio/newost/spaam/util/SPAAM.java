@@ -185,7 +185,15 @@ public class SPAAM {
 			Log.i(TAG, "Not in CALIB_RAW status");
 		}
 		else {
-			Alignment a = new Alignment(X, Y, M.times(singlePoint));
+			Matrix temp = M.times(singlePoint);
+
+			// Clearing out outlier
+			if (temp.get(2,0) > 0 || temp.get(2,0) < -5000){
+				return;
+			}
+			// Done clearing out outlier
+
+			Alignment a = new Alignment(X, Y, temp);
 			if ( countCurrent < countMax ) {
 				alignPoints.add(a);
 				countCurrent = alignPoints.size();
@@ -203,7 +211,15 @@ public class SPAAM {
 			Log.i(TAG, "Not in CALIB_RAW status");
 		}
 		else {
-			Alignment a = new Alignment(S, M.times(singlePoint));
+			Matrix temp = M.times(singlePoint);
+
+			// Clearing out outlier
+			if (temp.get(2,0) > 0 || temp.get(2,0) < -5000){
+				return;
+			}
+			// Done clearing out outlier
+
+			Alignment a = new Alignment(S, temp);
 			if ( countCurrent < countMax ) {
 				alignPoints.add(a);
 				countCurrent = alignPoints.size();

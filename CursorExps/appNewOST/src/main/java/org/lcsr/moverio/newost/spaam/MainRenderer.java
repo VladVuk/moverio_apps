@@ -119,6 +119,8 @@ public class MainRenderer extends ARRenderer {
     	gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
 
+
+
         float[] trans = visualTracker.getMarkerTransformationGL();
     	if ( trans != null && glProj != null ) {
 //            Log.i(TAG, "glProj1: " + glProj[0] + ", " + glProj[1] + ", " + glProj[2] + ", " + glProj[3]);
@@ -139,7 +141,7 @@ public class MainRenderer extends ARRenderer {
 
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadMatrixf(trans, 0);
-            cube.draw(gl);
+//            cube.draw(gl);
 
         }
     }

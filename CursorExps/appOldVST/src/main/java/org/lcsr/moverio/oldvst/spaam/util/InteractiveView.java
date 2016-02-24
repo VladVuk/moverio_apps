@@ -98,7 +98,7 @@ public class InteractiveView extends View {
 
 		switch (spaam.status) {
 		case CALIB_RAW:
-			drawPoint(paint, canvas, PointType.PointCursor);
+//			drawPoint(paint, canvas, PointType.PointCursor);
 			drawText(paint, canvas, "Current Alignments: " + spaam.countCurrent + " / " + spaam.countMax);
 			drawAuxiliaryPoint(paint, canvas);
 			break;

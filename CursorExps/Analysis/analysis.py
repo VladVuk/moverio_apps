@@ -9,7 +9,7 @@ filenames = sys.argv[1:]
 
 avgNum = 18
 
-
+outlierThres = 100
 
 
 '''
@@ -126,12 +126,12 @@ for filename in filenames:
 			results = [float(i) for i in words[1:]]
 			pushMatrix(results, 3)
 			x, y = getTrackedPos()
-			# print x-normalizedX(X), y-normalizedY(Y)
 			currentDistances.append((x-normalizedX(X), y-normalizedY(Y)))
 		elif words[0] == "*":
 			results = [float(i) for i in words[1:]]
 			pushMatrix(results, 0)
 			x, y = getTrackedPos()
+			# print x, y
 			currentDistances.append((x-normalizedX(X), y-normalizedY(Y)))
 		elif words[0] == '$':
 			targetCount += 1
@@ -159,9 +159,10 @@ for filename in filenames:
 		# yavg = np.mean(d[-avgNumCurrent:][1])
 		xavg = d[-1][0]
 		yavg = d[-1][1]
-		if abs(xavg) > 400 or abs(yavg) > 400:
+		if abs(xavg) > outlierThres or abs(yavg) > outlierThres:
 			continue
 		array.append(math.sqrt(xavg**2 + yavg**2))
+		print math.sqrt(xavg**2 + yavg**2)
 
 
 	array = np.array(array)

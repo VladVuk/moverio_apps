@@ -193,14 +193,21 @@ public class SPAAM {
 		A = null;
 		Log.i(TAG, "SPAAM cleared");
 	}
-	
+
 	public void newAlignment(int X, int Y, Matrix M ){
 		if ( status != SPAAMStatus.CALIB_RAW ) {
 			Log.i(TAG, "Not in CALIB_RAW status");
 		}
 		else {
+			Matrix temp = M.times(singlePoint);
+
+			// Clearing out outlier
+			if (temp.get(2,0) > 0 || temp.get(2,0) < -5000){
+				return;
+			}
+			// Done clearing out outlier
 			Point pt = getAuxiliaryPoint();
-			Alignment a = new Alignment(pt.x, pt.y, M.times(singlePoint));
+			Alignment a = new Alignment(pt.x, pt.y, temp);
 			if ( countCurrent < countMax ) {
 				alignPoints.add(a);
 				countCurrent = alignPoints.size();
@@ -212,13 +219,21 @@ public class SPAAM {
 			}
 		}
 	}
-	
+
 	public void newAlignment(Matrix S, Matrix M ){
 		if ( status != SPAAMStatus.CALIB_RAW ) {
 			Log.i(TAG, "Not in CALIB_RAW status");
 		}
 		else {
-			Alignment a = new Alignment(S, M.times(singlePoint));
+			Matrix temp = M.times(singlePoint);
+
+			// Clearing out outlier
+			if (temp.get(2,0) > 0 || temp.get(2,0) < -5000){
+				return;
+			}
+			// Done clearing out outlier
+
+			Alignment a = new Alignment(S, temp);
 			if ( countCurrent < countMax ) {
 				alignPoints.add(a);
 				countCurrent = alignPoints.size();
