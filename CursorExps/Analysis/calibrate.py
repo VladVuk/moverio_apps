@@ -4,7 +4,7 @@ import pygame
 import os
 import socket
 
-TCP_IP = '10.189.175.110'
+TCP_IP = '10.188.185.246'
 
 # VST
 # TCP_PORT = 18944
@@ -20,7 +20,7 @@ Y_OFFSET = 0
 
 
 
-SOCKET = False
+SOCKET = True
 if SOCKET:
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((TCP_IP, TCP_PORT))
