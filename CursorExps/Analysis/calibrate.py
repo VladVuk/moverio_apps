@@ -4,7 +4,7 @@ import pygame
 import os
 import socket
 
-TCP_IP = '10.188.185.246'
+TCP_IP = '10.188.162.225'
 
 # VST
 # TCP_PORT = 18944
